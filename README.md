@@ -18,6 +18,7 @@ also see [Rust Option][option]
 import {
   Some,
   None,
+  match,
 } from 'rust-option'
 
 let x = Some(2)
@@ -25,9 +26,10 @@ let y = None
 
 match(x, [
   [Some(2), () => console.log('match')],
-  [None, () => console.log('match None')],
-  [() => console.log('match default')],
+  [None, () => console.log('not match None')],
+  [() => console.log('not match default')],
 ])
+// output 'match'
 ```
 
 [option]: https://doc.rust-lang.org/std/option/enum.Option.html
@@ -71,7 +73,21 @@ TODO
 
 ## Implementation list
 
-TODO
+- [x] isSome
+- [x] isNone
+- [x] expect
+- [x] unwrap
+- [x] unwrapOr
+- [x] unwrapOrElse
+- [x] map
+- [x] mapOr
+- [x] mapOrElse
+- [x] and
+- [x] andThen
+- [x] filter
+- [x] or
+- [x] orElse
+- [x] xor
 
 ## License
 
