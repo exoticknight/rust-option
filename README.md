@@ -10,7 +10,7 @@ npm i -S rust-option
 
 ## Usage
 
-also see [Rust Option][option]
+Nearly all methods are similar to the [Rust Documentation][option]
 
 > NOTE: this lib will not brings all methods from Rust's Option, see [Note](#Note)
 
@@ -24,10 +24,17 @@ import {
 let x = Some(2)
 let y = None
 
+// Note: matchs are exhaustive
 match(x, [
   [Some(2), () => console.log('match')],
   [None, () => console.log('not match None')],
+  // the 'default' match
   [() => console.log('not match default')],
+])
+
+// this will throws 'non-exhaustive patterns'
+match(x, [
+  [None, () => console.log('not match None')],
 ])
 // output 'match'
 ```
@@ -50,7 +57,7 @@ This lib provides shallow equal by default, but you can enable deepEqual by call
 import {
   Some,
   useDeepEqual
-} from '../src'
+} from 'rust-option'
 
 let ox = Some({foo: 1})
 let oy = Some({foo: 1})
@@ -71,7 +78,7 @@ ox.equal(oy, true)  // true
 
 TODO
 
-## Implementation list
+## Implementation
 
 - [x] isSome
 - [x] isNone
@@ -88,6 +95,25 @@ TODO
 - [x] or
 - [x] orElse
 - [x] xor
+
+## not implement
+
+as_ref
+as_mut
+as_pin_ref
+as_pin_mut
+ok_or
+ok_or_else
+iter
+iter_mut
+get_or_insert
+get_or_insert_with
+take
+replace
+cloned
+unwrap_or_default
+deref
+transpose
 
 ## License
 
