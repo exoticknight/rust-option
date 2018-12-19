@@ -349,7 +349,7 @@ export function makeMatch<T>(branches:Branch[], deep:boolean=false):(opt:Option<
     }
 
     // no match, not allow
-    throw new Error('Option must match at least one branch')
+    throw new Error('non-exhaustive patterns')
   }
 }
 
