@@ -1,0 +1,10 @@
+language: node_js
+env:
+  global:
+    - CODECOV_TOKEN: e664dbf2-259e-4c01-a3d2-7e82207be7d3
+node_js:
+  - "node"
+scripts:
+  - npm install codecov -g
+after_success:
+  - codecov

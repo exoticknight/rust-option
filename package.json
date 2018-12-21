@@ -14,7 +14,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "ts-node node_modules/tape/bin/tape ./test/*.spec.ts",
+    "test": "nyc tape test/*.spec.ts | tap-spec; nyc report --reporter=text",
     "build": "rm -rf dist && tsc",
     "prebuild": "npm test"
   },
@@ -40,8 +40,11 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash.isequal": "^4.5.3",
     "@types/node": "^10.12.18",
     "@types/tape": "^4.2.32",
+    "nyc": "^13.1.0",
+    "tap-spec": "^5.0.0",
     "tape": "^4.9.1",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.1"
