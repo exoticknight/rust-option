@@ -3,7 +3,6 @@ import test from 'tape'
 import {
   Some,
   None,
-  useDeepEqual,
   match,
 } from '../src'
 
@@ -54,9 +53,9 @@ test('unwrap / unwrapOr / unwrapOrElse', t => {
 
 test('map / mapOr / mapOrElse', t => {
   let someStr = Some('Hello, World!')
-  let someStrLength = someStr.map(s => s.length)
-
-  t.true(someStrLength.equal(Some(13)))
+  t.true(someStr.map(s => s.length).equal(Some(13)))
+  someStr = None
+  t.true(someStr.map(s => s.length).equal(None))
 
   let x = Some('foo')
   t.equal(x.mapOr(42, v => v.length), 3)
@@ -178,7 +177,6 @@ test('equal', t => {
   t.true(x.equal(y))
 
   // deepEqual
-  useDeepEqual()
   let ox = Some({foo: 1})
   let oy = Some({foo: 1})
   t.false(ox.equal(oy))
@@ -226,7 +224,6 @@ test('match', t => {
   ])
 
   // deep match
-  useDeepEqual()
   match(Some({foo: 1}), [
     [None, () => t.fail('deep not match')],
     [Some({foo: 2}), () => t.fail('deep not match')],
