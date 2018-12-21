@@ -1,4 +1,4 @@
-let lodashEqual:Function
+import lodashEqual from 'lodash.isequal'
 
 export interface Option<T> {
   /** rust methods below */
@@ -227,9 +227,6 @@ class some<T> implements Option<T> {
 
   equal(optb:Option<T>, deep:boolean=false):boolean {
     if (deep) {
-      if (lodashEqual === undefined) {
-        throw new Error('deepEqual is not ready, call useDeepEqual to enable it.')
-      }
       return optb.isSome() && lodashEqual(this.value, optb.unwrap())
     } else {
       return optb.isSome() && this.value === optb.unwrap()
@@ -526,7 +523,7 @@ class ok<T> implements Result<T, any>  {
     return None
   }
 
-  map<U>(op:(t:T)=>U):Result<U, {}> {
+  map<U>(op:(t:T)=>U):Result<U, any> {
     return Ok(op(this.value))
   }
 
@@ -588,9 +585,6 @@ class ok<T> implements Result<T, any>  {
 
   equal(resb:Result<T, any>, deep?:boolean):boolean {
     if (deep) {
-      if (lodashEqual === undefined) {
-        throw new Error('deepEqual is not ready, call useDeepEqual to enable it.')
-      }
       return resb.isOk() && lodashEqual(this.value, resb.unwrap())
     } else {
       return resb.isOk() && this.value === resb.unwrap()
@@ -696,20 +690,6 @@ export function Err<E>(error:E):Result<any, E> {
 }
 
 // helper functions
-
-export function useDeepEqual() {
-  if (lodashEqual === undefined) {
-    lodashEqual = require('lodash.isequal')
-  }
-}
-
-export function optionEqual<T>(opta:Option<T>, optb:Option<T>, deep:boolean=false) {
-  return opta.isNone() && optb.isNone()
-    || (
-      opta.isSome() && optb.isSome() && opta.equal(optb, deep)
-    )
-}
-
 export function makeMatch<T>(branches:(((x:Option<T>)=>any) | [Option<any>, (x?:Option<T>)=>any])[], deep:boolean=false):(opt:Option<T>)=>any {
   return (x:Option<T>) => {
     for(let i=0,len=branches.length; i<len; i++) {
