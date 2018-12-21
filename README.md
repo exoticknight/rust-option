@@ -1,6 +1,9 @@
 # rust-option
+[![Build Status](https://travis-ci.org/exoticknight/rust-option.svg?branch=master)](https://travis-ci.org/exoticknight/rust-option)
+[![codecov](https://codecov.io/gh/exoticknight/rust-option/branch/master/graph/badge.svg)](https://codecov.io/gh/exoticknight/rust-option)
+![license](https://img.shields.io/npm/l/rust-option.svg)
 
-brings Option in Rust to Javascript
+brings Option and Result in Rust to Javascript
 
 ## Install
 
