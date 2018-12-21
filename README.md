@@ -96,16 +96,9 @@ This lib provides shallow equal by default, but you can enable deepEqual by call
 
 ```javascript
 import {
-  Some,
-  useDeepEqual
+  Some
 } from 'rust-option'
 
-let ox = Some({foo: 1})
-let oy = Some({foo: 1})
-ox.equal(oy)  // false
-ox.equal(oy, true)  // throws error
-
-useDeepEqual()
 let ox = Some({foo: 1})
 let oy = Some({foo: 1})
 ox.equal(oy)  // false
@@ -119,7 +112,7 @@ ox.equal(oy, true)  // true
 
 TODO
 
-## Implementation
+## implement for Option
 
 - [x] isSome
 - [x] isNone
@@ -137,7 +130,7 @@ TODO
 - [x] orElse
 - [x] xor
 
-## not implement
+## not implement for Option
 
 ```text
 as_ref
@@ -157,6 +150,30 @@ unwrap_or_default
 deref
 transpose
 ```
+
+## implement for Result
+
+- [x] isOk
+- [x] isErr
+- [x] ok
+- [x] err
+- [x] map
+- [x] mapOrElse
+- [x] mapErr
+- [x] and
+- [x] andThen
+- [x] or
+- [x] orElse
+- [x] unwrapOr
+- [x] unwrapOrElse
+- [x] unwrap
+- [x] expect
+- [x] unwrapErr
+- [x] expectErr
+
+## not implement for Result
+
+TODO
 
 ## License
 
