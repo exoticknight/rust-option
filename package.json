@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/lodash.isequal": "^4.5.3",
     "@types/node": "^10.12.18",
-    "@types/tape": "^4.2.32",
+    "@types/tape": "^4.2.33",
     "nyc": "^13.1.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1",
