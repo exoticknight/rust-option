@@ -29,12 +29,7 @@ match(x, [
   [Some(2), () => console.log('match')],
   [None, () => console.log('not match None')],
   // the 'default' match
-  [() => console.log('not match default')],
-])
-
-// this will throws 'non-exhaustive patterns'
-match(x, [
-  [None, () => console.log('not match None')],
+  () => console.log('not match default'),
 ])
 // output 'match'
 ```
@@ -45,6 +40,49 @@ match(x, [
 
 ```bash
 npm test
+```
+
+## The `match` function
+
+`match` function provides match syntax similar to Rust, but in JavaScript way.
+
+```javascript
+import {
+  Some,
+  None,
+  match,
+} from 'rust-option'
+
+let x = Some(2)
+let y = None
+```
+
+a normal match
+
+```javascript
+match(x, [
+  [Some(2), () => console.log('match')],
+  [None, () => console.log('not match None')],
+  // the 'default' match
+  () => console.log('not match default'),
+])
+```
+
+non-exhaustive match throws Error
+
+```javascript
+// this will throws 'non-exhaustive patterns' Error
+match(x, [
+  [None, () => console.log('not match None')],
+])
+```
+
+default' branch can get the matchee
+
+```javascript
+match(x, [
+  m => console.log('default match get Some(2) as parameter')
+])
 ```
 
 ## deepEqual
@@ -98,6 +136,7 @@ TODO
 
 ## not implement
 
+```text
 as_ref
 as_mut
 as_pin_ref
@@ -114,6 +153,7 @@ cloned
 unwrap_or_default
 deref
 transpose
+```
 
 ## License
 

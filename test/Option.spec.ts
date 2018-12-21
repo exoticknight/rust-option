@@ -7,10 +7,6 @@ import {
   match,
 } from '../src'
 
-test('', t => {
-  t.end()
-})
-
 test('isSome / isNone', t => {
   let x = Some(2)
   t.true(x.isSome())
@@ -196,20 +192,20 @@ test('match', t => {
     [None, () => t.fail('Some not match')],
     [Some(1), () => t.fail('Some not match')],
     [Some(2), () => t.pass('Some match')],
-    [() => t.fail('Some not match')],
+    () => t.fail('Some not match'),
   ])
 
   match(None, [
     [Some(1), () => t.fail('None not match')],
     [None, () => t.pass('None match')],
-    [() => t.fail('None not match')],
+    () => t.fail('None not match'),
   ])
 
   // default match
   match(Some(3), [
     [Some(1), () => t.fail('default not match')],
     [Some(2), () => t.fail('default not match')],
-    [() => t.pass('default match')],
+    x => t.true(x.equal(Some(3))),
   ])
 
   // no match
@@ -219,13 +215,13 @@ test('match', t => {
       [Some(2), () => t.fail('no match')],
     ])
   } catch (error) {
-    t.pass('no match')
+    t.pass('should throws no match')
   }
 
   // greedy match
   match(Some(3), [
     [Some(1), () => t.fail('greedy not match')],
-    [() => t.pass('greedy match')],
+    () => t.pass('greedy match'),
     [Some(3), () => t.fail('greedy not match')],
   ])
 
@@ -235,7 +231,7 @@ test('match', t => {
     [None, () => t.fail('deep not match')],
     [Some({foo: 2}), () => t.fail('deep not match')],
     [Some({foo: 1}), () => t.pass('deep match')],
-    [() => t.fail('deep not match')],
+    () => t.fail('deep not match'),
   ], true)
 
   t.end()

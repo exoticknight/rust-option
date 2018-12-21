@@ -14,7 +14,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "ts-node ./test/index.spec.ts",
+    "test": "ts-node node_modules/tape/bin/tape ./test/*.spec.ts",
     "build": "rm -rf dist && tsc",
     "prebuild": "npm test"
   },
@@ -40,6 +40,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^10.12.18",
     "@types/tape": "^4.2.32",
     "tape": "^4.9.1",
     "ts-node": "^7.0.1",
