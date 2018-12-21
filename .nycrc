@@ -9,10 +9,10 @@
     "**/*.d.ts"
   ],
   "reporter": [
-    "json"
+    "html",
+    "text"
   ],
   "require": [
     "ts-node/register"
-  ],
-  "all": true
+  ]
 }

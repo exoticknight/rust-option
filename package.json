@@ -15,14 +15,19 @@
   ],
   "scripts": {
     "test": "nyc tape test/*.spec.ts | tap-spec; nyc report --reporter=text",
+    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "build": "rm -rf dist && tsc",
     "prebuild": "npm test"
   },
   "keywords": [
     "rust",
-    "option",
-    "some",
-    "none",
+    "Option",
+    "Result",
+    "Some",
+    "None",
+    "Ok",
+    "Err",
+    "Error",
     "expect",
     "unwrap",
     "map",
@@ -32,7 +37,8 @@
     "filter",
     "xor",
     "equal",
-    "rustoption"
+    "rustoption",
+    "rustresult"
   ],
   "author": {
     "email": "draco.knight0@gmail.com",
@@ -43,6 +49,7 @@
     "@types/lodash.isequal": "^4.5.3",
     "@types/node": "^10.12.18",
     "@types/tape": "^4.2.33",
+    "codecov": "^3.1.0",
     "nyc": "^13.1.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1",
