@@ -1,158 +1,11 @@
 import lodashEqual from 'lodash.isequal'
+import a = require('./IOption')
+export import Option = a.Option
+import b = require('./IResult')
+export import Result = b.Result
 
-export interface Option<T> {
-  /** rust methods below */
-  /**
-   * Returns true if the option is a Some value.
-   *
-   * @returns {boolean}
-   * @memberof Option
-   */
-  isSome():boolean
-
-  /**
-   * Returns true if the option is a None value.
-   *
-   * @returns {boolean}
-   * @memberof Option
-   */
-  isNone():boolean
-
-  /**
-   * throw Error if the value is a None with a custom error message provided by msg.
-   *
-   * @param {string} msg
-   * @returns {(T | void)}
-   * @memberof Option
-   */
-  expect(msg:string):T | void
-
-  /**
-   * return the value v out of the Option<T> if it is Some(v).
-   *
-   * @returns {(T | void)}
-   * @memberof Option
-   */
-  unwrap():T | void
-
-  /**
-   * Returns the contained value or a placeholder.
-   *
-   * @param {T} placeholder
-   * @returns {T}
-   * @memberof Option
-   */
-  unwrapOr(placeholder:T):T
-
-  /**
-   * Returns the contained value or computes it from a placeholderFn.
-   *
-   * @param {()=>T} placeholderFn
-   * @returns {T}
-   * @memberof Option
-   */
-  unwrapOrElse(placeholderFn:()=>T):T
-
-  /**
-   * Maps an Option<T> to Option<U> by applying a function to a contained value.
-   *
-   * @template U
-   * @param {(value:T)=>U} fn
-   * @returns {Option<U>}
-   * @memberof Option
-   */
-  map<U>(fn:(value:T)=>U):Option<U>
-
-  /**
-   * Applies a function to the contained value (if any), or returns the provided placeholder (if not).
-   *
-   * @template U
-   * @param {U} placeholder
-   * @param {(value:T)=>U} fn
-   * @returns {U}
-   * @memberof Option
-   */
-  mapOr<U>(placeholder:U, fn:(value:T)=>U):U
-
-  /**
-   * Applies a function to the contained value (if any), or computes with placeholderFn (if not).
-   *
-   * @template U
-   * @param {()=>U} placeholderFn
-   * @param {(value:T)=>U} fn
-   * @returns {U}
-   * @memberof Option
-   */
-  mapOrElse<U>(placeholderFn:()=>U, fn:(value:T)=>U):U
-
-  /**
-   * Returns None if the option is None, otherwise returns optb.
-   *
-   * @template U
-   * @param {Option<U>} optb
-   * @returns {Option<U>}
-   * @memberof Option
-   */
-  and<U>(optb:Option<U>):Option<U>
-
-  /**
-   * Returns None if the option is None, otherwise calls f with the wrapped value and returns the result.
-   * You can recognize it as flatMap.
-   *
-   * @template U
-   * @param {(value:T)=>Option<U>} fn
-   * @returns {Option<U>}
-   * @memberof Option
-   */
-  andThen<U>(fn:(value:T)=>Option<U>):Option<U>
-
-  /**
-   *
-   *
-   * @param {(value:T)=>boolean} predicate
-   * @returns {Option<T>}
-   * @memberof Option
-   */
-  filter(predicate:(value:T)=>boolean):Option<T>
-
-  /**
-   * Returns the option if it contains a value, otherwise returns optb.
-   *
-   * @param {Option<T>} optb
-   * @returns {Option<T>}
-   * @memberof Option
-   */
-  or(optb:Option<T>):Option<T>
-
-  /**
-   * Returns the option if it contains a value, otherwise calls f and returns the result.
-   *
-   * @param {()=>Option<T>} fn
-   * @returns {Option<T>}
-   * @memberof Option
-   */
-  orElse(fn:()=>Option<T>):Option<T>
-
-  /**
-   * Returns Some if exactly one of self, optb is Some, otherwise returns None.
-   *
-   * @param {Option<T>} optb
-   * @returns {Option<T>}
-   * @memberof Option
-   */
-  xor(optb:Option<T>):Option<T>
-  /** rust methods above */
-
-  // helper methods
-  /**
-   * return true if Option's value equals to optb's.
-   *
-   * @param {Option<T>} optb
-   * @returns {boolean}
-   * @memberof Option
-   */
-  equal(optb:Option<T>, deep?:boolean):boolean
-}
+import { Result } from './IResult'
+import { Option } from './IOption'
 
 class some<T> implements Option<T> {
   private value:T
@@ -177,11 +30,13 @@ class some<T> implements Option<T> {
     return this.value
   }
 
-  unwrapOr() {
+  // @ts-ignore: noUnusedParameters
+  unwrapOr(placeholder:T):T {
     return this.value
   }
 
-  unwrapOrElse() {
+  // @ts-ignore: noUnusedParameters
+  unwrapOrElse(placeholderFn:()=>T):T {
     return this.value
   }
 
@@ -225,6 +80,16 @@ class some<T> implements Option<T> {
     return optb.isNone() ? this : None
   }
 
+  transpose<T, E>():Result<Option<T>, E> {
+    if (this.value instanceof ok) {
+      return Ok(Some(<T>this.value.unwrap()))
+    } else if (this.value instanceof err) {
+      return Err(<E>this.value.unwrap())
+    } else {
+      throw new Error('value is not Result!')
+    }
+  }
+
   equal(optb:Option<T>, deep:boolean=false):boolean {
     if (deep) {
       return optb.isSome() && lodashEqual(this.value, optb.unwrap())
@@ -234,7 +99,7 @@ class some<T> implements Option<T> {
   }
 }
 
-class none implements Option<any> {
+class none<T> implements Option<T> {
 
   isNone() {
     return true
@@ -252,54 +117,58 @@ class none implements Option<any> {
     throw new Error('cannot unwrap None')
   }
 
-  unwrapOr(placeholder:any) {
+  unwrapOr(placeholder:T):T {
     return placeholder
   }
 
-  unwrapOrElse(placeholderFn:()=>any) {
+  unwrapOrElse(placeholderFn:()=>T):T {
     return placeholderFn()
   }
 
   // @ts-ignore: noUnusedParameters
-  map<U>(fn:(value:any)=>U):Option<U> {
+  map<U>(fn:(value:T)=>U):Option<U> {
     return None
   }
 
   // @ts-ignore: noUnusedParameters
-  mapOr<U>(placeholder:U, fn:(value:any)=>U):U {
+  mapOr<U>(placeholder:U, fn:(value:T)=>U):U {
     return placeholder
   }
 
   // @ts-ignore: noUnusedParameters
-  mapOrElse<U>(placeholderFn:()=>U, fn:(value:any)=>U):U {
+  mapOrElse<U>(placeholderFn:()=>U, fn:(value:T)=>U):U {
     return placeholderFn()
   }
 
   // @ts-ignore: noUnusedParameters
-  and<U>(optb:Option<U>):Option<U> {
+  and<any>(optb:Option<U>):Option<any> {
     return this
   }
 
   // @ts-ignore: noUnusedParameters
-  andThen<U>(fn:(value:any)=>Option<U>):Option<U> {
+  andThen<any>(fn:(value:T)=>Option<U>):Option<any> {
     return this
   }
 
   // @ts-ignore: noUnusedParameters
-  filter(predicate:(value:any)=>boolean):Option<any> {
+  filter(predicate:(value:T)=>boolean):Option<T> {
     return this
   }
 
-  or(optb:Option<any>):Option<any> {
+  or(optb:Option<T>):Option<T> {
     return optb
   }
 
-  orElse(fn:()=>Option<any>):Option<any> {
+  orElse(fn:()=>Option<T>):Option<T> {
     return fn()
   }
 
-  xor(optb:Option<any>):Option<any> {
-    return optb.isSome() ? optb : None
+  xor(optb:Option<T>):Option<T> {
+    return optb.isSome() ? optb : this
+  }
+
+  transpose<E>():Result<Option<any>, E> {
+    return Ok(this)
   }
 
   equal(optb:Option<any>):boolean {
@@ -313,194 +182,7 @@ export function Some<T>(value:T):Option<T> {
 
 export const None:Option<any> = new none
 
-export interface Result<T, E> {
-  /** rust method below */
-  /**
-   * Returns true if the result is Ok.
-   *
-   * @returns {boolean}
-   * @memberof Result
-   */
-  isOk():boolean
-
-  /**
-   * Returns true if the result is Err.
-   *
-   * @returns {boolean}
-   * @memberof Result
-   */
-  isErr():boolean
-
-  /**
-   * Converts from Result<T, E> to Option<T> and discarding the error, if any.
-   *
-   * @returns {Option<T>}
-   * @memberof Result
-   */
-  ok():Option<T>
-
-  /**
-   * Converts from Result<T, E> to Option<E> and discarding the success value, if any.
-   *
-   * @returns {Option<E>}
-   * @memberof Result
-   */
-  err():Option<E>
-
-  /**
-   * Maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value untouched.
-   *
-   * This function can be used to compose the results of two functions.
-   *
-   * @template U
-   * @param {(t:T)=>U} op
-   * @returns {Result<U, E>}
-   * @memberof Result
-   */
-  map<U>(op:(t:T)=>U):Result<U, E>
-
-  /**
-   * Maps a Result<T, E> to U by applying a function to a contained Ok value, or a fallback function to a contained Err value.
-   *
-   * This function can be used to unpack a successful result while handling an error.
-   *
-   * @template U
-   * @param {(e:E)=>U} fallback
-   * @param {(t:T)=>U} map
-   * @returns {U}
-   * @memberof Result
-   */
-  mapOrElse<U>(fallback:(e:E)=>U, map:(t:T)=>U):U
-
-  /**
-   * Maps a Result<T, E> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value untouched.
-   *
-   * This function can be used to pass through a successful result while handling an error.
-   *
-   * @template F
-   * @param {(e:E)=>F} op
-   * @returns {Result<T, F>}
-   * @memberof Result
-   */
-  mapErr<F>(op:(e:E)=>F):Result<T, F>
-
-  /**
-   * Returns res if the result is Ok, otherwise returns the Err value of self.
-   *
-   * @template U
-   * @param {Result<U, E>} res
-   * @returns {Result<U, E>}
-   * @memberof Result
-   */
-  and<U>(res:Result<U, E>):Result<U, E>
-
-  /**
-   * Calls op if the result is Ok, otherwise returns the Err value of self.
-   *
-   * This function can be used for control flow based on Result values.
-   *
-   * @template U
-   * @param {(t:T)=>Result<U, E>} op
-   * @returns {Result<U, E>}
-   * @memberof Result
-   */
-  andThen<U>(op:(t:T)=>Result<U, E>):Result<U, E>
-
-  /**
-   * Returns res if the result is Err, otherwise returns the Ok value of self.
-   *
-   * @template F
-   * @param {Result<T, F>} res
-   * @returns {Result<T, F>}
-   * @memberof Result
-   */
-  or<F>(res:Result<T, F>):Result<T, F>
-
-  /**
-   * Calls op if the result is Err, otherwise returns the Ok value of self.
-   *
-   * This function can be used for control flow based on result values.
-   *
-   * @template F
-   * @param {(e:E)=>Result<T, F>} op
-   * @returns {Result<T, F>}
-   * @memberof Result
-   */
-  orElse<F>(op:(e:E)=>Result<T, F>):Result<T, F>
-
-  /**
-   * Unwraps a result, yielding the content of an Ok. Else, it returns optb.
-   *
-   * @param {T} optb
-   * @returns {T}
-   * @memberof Result
-   */
-  unwrapOr(optb:T):T
-
-  /**
-   * Unwraps a result, yielding the content of an Ok. If the value is an Err then it calls op with its value.
-   *
-   * @param {(e:E)=>T} op
-   * @returns {T}
-   * @memberof Result
-   */
-  unwrapOrElse(op:(e:E)=>T):T
-
-  /**
-   * Unwraps a result, yielding the content of an Ok.
-   *
-   * Throws Error if the value is an Err, with a error message provided by the Err's value.
-   *
-   * @returns {T}
-   * @memberof Result
-   */
-  unwrap():T
-
-  /**
-   * Unwraps a result, yielding the content of an Ok.
-   *
-   * Throws Error if the value is an Err, with a error message including the passed message, and the content of the Err.
-   *
-   * @param {string} msg
-   * @returns {T}
-   * @memberof Result
-   */
-  expect(msg:string):T
-
-  /**
-   * Unwraps a result, yielding the content of an Err.
-   *
-   * Throws Error if the value is an Ok, with a custom error message provided by the Ok's value.
-   *
-   * @returns {E}
-   * @memberof Result
-   */
-  unwrapErr():E
-
-  /**
-   * Unwraps a result, yielding the content of an Err.
-   *
-   * Throws Error if the value is an Ok, with a error message including the passed message, and the content of the Ok.
-   *
-   * @param {string} msg
-   * @returns {E}
-   * @memberof Result
-   */
-  expectErr(msg:string):E
-  /** rust method above */
-
-  // helper method
-  /**
-   * return true if Result's value equals to resb's.
-   *
-   * @param {Result<T, E>} resb
-   * @returns {boolean}
-   * @memberof Result
-   */
-  equal(optb:Result<T, E>, deep?:boolean):boolean
-}
-
-class ok<T> implements Result<T, any>  {
+class ok<T, E> implements Result<T, E>  {
   private value:T
 
   constructor(value:T) {
@@ -519,11 +201,11 @@ class ok<T> implements Result<T, any>  {
     return Some(this.value)
   }
 
-  err():Option<any> {
+  err():Option<E> {
     return None
   }
 
-  map<U>(op:(t:T)=>U):Result<U, any> {
+  map<U>(op:(t:T)=>U):Result<U, E> {
     return Ok(op(this.value))
   }
 
@@ -533,26 +215,25 @@ class ok<T> implements Result<T, any>  {
   }
 
   // @ts-ignore: noUnusedParameters
-  mapErr(op:(e:any)=>any):Result<T, any> {
-    // maybe Ok(this.value)
-    return this
+  mapErr<F>(op:(e:E)=>F):Result<T, F> {
+    return Ok(this.value)
   }
 
-  and<U>(res:Result<U, any>):Result<U, any> {
+  and<U>(res:Result<U, E>):Result<U, E> {
     return res
   }
 
-  andThen<U>(op:(t:T)=>Result<U, any>):Result<U, any> {
+  andThen<U>(op:(t:T)=>Result<U, E>):Result<U, E> {
     return op(this.value)
   }
 
   // @ts-ignore: noUnusedParameters
-  or(res:Result<T, any>):Result<T, any> {
+  or(res:Result<T, F>):Result<T, F> {
     return this
   }
 
   // @ts-ignore: noUnusedParameters
-  orElse(op:(e:E)=>Result<T, any>):Result<T, any> {
+  orElse(op:(e:E)=>Result<T, F>):Result<T, F> {
     return this
   }
 
@@ -575,15 +256,25 @@ class ok<T> implements Result<T, any>  {
     return this.value
   }
 
-  unwrapErr():any {
+  unwrapErr():E {
     throw new Error(String(this.value))
   }
 
-  expectErr(msg:string):any {
+  expectErr(msg:string):E {
     throw new Error(msg + ': ' + String(this.value))
   }
 
-  equal(resb:Result<T, any>, deep?:boolean):boolean {
+  transpose():Option<Result<T, E>> {
+    if (this.value instanceof some) {
+      return Some(Ok(this.value.unwrap()))
+    } else if (this.value instanceof none) {
+      return None
+    } else {
+      throw new Error('value is not Option!')
+    }
+  }
+
+  equal(resb:Result<T, E>, deep?:boolean):boolean {
     if (deep) {
       return resb.isOk() && lodashEqual(this.value, resb.unwrap())
     } else {
@@ -592,7 +283,7 @@ class ok<T> implements Result<T, any>  {
   }
 }
 
-class err<E> implements Result<any, E> {
+class err<T, E> implements Result<T, E> {
   private error:E
 
   constructor(error:E) {
@@ -607,7 +298,7 @@ class err<E> implements Result<any, E> {
     return true
   }
 
-  ok():Option<any> {
+  ok():Option<T> {
     return None
   }
 
@@ -616,9 +307,8 @@ class err<E> implements Result<any, E> {
   }
 
   // @ts-ignore: noUnusedParameters
-  map(op:(t:any)=>any):Result<any, E> {
-    // maybe Err(this.error)
-    return this
+  map(op:(t:T)=>U):Result<U, E> {
+    return Err(this.error)
   }
 
   // @ts-ignore: noUnusedParameters
@@ -626,27 +316,25 @@ class err<E> implements Result<any, E> {
     return fallback(this.error)
   }
 
-  mapErr<F>(op:(e:E)=>F):Result<any, F> {
+  mapErr<F>(op:(e:E)=>F):Result<T, F> {
     return Err(op(this.error))
   }
 
   // @ts-ignore: noUnusedParameters
   and<U>(res:Result<U, E>):Result<U, E> {
-    // maybe Err(this.error)
-    return this
+    return Err(this.error)
   }
 
   // @ts-ignore: noUnusedParameters
-  andThen(op:(t:any)=>Result<any, E>):Result<any, E> {
-    // maybe Err(this.error)
-    return this
+  andThen(op:(t:T)=>Result<U, E>):Result<U, E> {
+    return Err(this.error)
   }
 
-  or<F>(res:Result<any, F>):Result<any, F> {
+  or<F>(res:Result<T, F>):Result<T, F> {
     return res
   }
 
-  orElse<F>(op:(e:E)=>Result<any, F>):Result<any, F> {
+  orElse<F>(op:(e:E)=>Result<T, F>):Result<T, F> {
     return op(this.error)
   }
 
@@ -658,11 +346,11 @@ class err<E> implements Result<any, E> {
     return op(this.error)
   }
 
-  unwrap():any {
+  unwrap():T {
     throw new Error(String(this.error))
   }
 
-  expect(msg:string):any {
+  expect(msg:string):T {
     throw new Error(msg + ': ' + String(this.error))
   }
 
@@ -671,8 +359,12 @@ class err<E> implements Result<any, E> {
   }
 
   // @ts-ignore: noUnusedParameters
-  expectErr(msg:string):any {
+  expectErr(msg:string):E {
     return this.error
+  }
+
+  transpose():Option<Result<T, E>> {
+    return Some(Err(this.error))
   }
 
   // @ts-ignore: noUnusedParameters

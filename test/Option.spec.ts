@@ -1,9 +1,14 @@
 import test from 'tape'
 
 import {
+  Option,
   Some,
   None,
   match,
+
+  Result,
+  Ok,
+  Err,
 } from '../src'
 
 test('isSome / isNone', t => {
@@ -185,6 +190,14 @@ test('equal', t => {
   t.end()
 })
 
+test('transpose', t => {
+  let x:Result<Option<number>, string> = Ok(Some(5))
+  let y:Option<Result<number, string>> = Some(Ok(5))
+  t.true(x.equal(y.transpose()))
+
+  t.end()
+})
+
 test('match', t => {
   match(Some(2), [
     [None, () => t.fail('Some not match')],
@@ -233,3 +246,5 @@ test('match', t => {
 
   t.end()
 })
+
+Err

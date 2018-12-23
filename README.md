@@ -15,7 +15,7 @@ npm i -S rust-option
 
 Nearly all methods are similar to the [Rust Documentation][option]
 
-> NOTE: this lib will not brings all methods from Rust's Option, see [Note](#Note)
+> this lib will not brings all methods from Rust's Option and Result, see [Note](#Note)
 
 ```javascript
 import {
@@ -92,7 +92,7 @@ match(x, [
 
 deepEqual in Javascript is not a piece of cake.
 
-This lib provides shallow equal by default, but you can enable deepEqual by calling `useDeepEqual` which is provided by [lodash.isequal][lodash.isequal].
+deepEqual in this lib is provided by [lodash.isequal][lodash.isequal].
 
 ```javascript
 import {
@@ -129,6 +129,7 @@ TODO
 - [x] or
 - [x] orElse
 - [x] xor
+- [x] transpose
 
 ## not implement for Option
 
@@ -148,7 +149,6 @@ replace
 cloned
 unwrap_or_default
 deref
-transpose
 ```
 
 ## implement for Result
@@ -170,10 +170,20 @@ transpose
 - [x] expect
 - [x] unwrapErr
 - [x] expectErr
+- [x] transpose
 
 ## not implement for Result
 
-TODO
+```text
+as_ref
+as_mut
+iter
+iter_mut
+unwrap_or_default
+deref_ok
+deref_err
+deref
+```
 
 ## License
 

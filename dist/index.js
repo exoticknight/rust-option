@@ -1,6 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-let lodashEqual;
+const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
 class some {
     constructor(value) {
         this.value = value;
@@ -17,10 +20,12 @@ class some {
     unwrap() {
         return this.value;
     }
-    unwrapOr() {
+    // @ts-ignore: noUnusedParameters
+    unwrapOr(placeholder) {
         return this.value;
     }
-    unwrapOrElse() {
+    // @ts-ignore: noUnusedParameters
+    unwrapOrElse(placeholderFn) {
         return this.value;
     }
     map(fn) {
@@ -54,22 +59,27 @@ class some {
     xor(optb) {
         return optb.isNone() ? this : exports.None;
     }
+    transpose() {
+        if (this.value instanceof ok) {
+            return Ok(Some(this.value.unwrap()));
+        }
+        else if (this.value instanceof err) {
+            return Err(this.value.unwrap());
+        }
+        else {
+            throw new Error('value is not Result!');
+        }
+    }
     equal(optb, deep = false) {
         if (deep) {
-            if (lodashEqual === undefined) {
-                throw new Error('deepEqual is not ready, call useDeepEqual to enable it.');
-            }
-            return optb.isSome() && lodashEqual(this.value, optb.unwrap());
+            return optb.isSome() && lodash_isequal_1.default(this.value, optb.unwrap());
         }
-        else
+        else {
             return optb.isSome() && this.value === optb.unwrap();
+        }
     }
 }
 class none {
-    constructor() {
-        // @ts-ignore: noUnusedParameters
-        this.value = undefined;
-    }
     isNone() {
         return true;
     }
@@ -119,7 +129,10 @@ class none {
         return fn();
     }
     xor(optb) {
-        return optb.isSome() ? optb : exports.None;
+        return optb.isSome() ? optb : this;
+    }
+    transpose() {
+        return Ok(this);
     }
     equal(optb) {
         return optb.isNone();
@@ -130,33 +143,180 @@ function Some(value) {
 }
 exports.Some = Some;
 exports.None = new none;
-// helper functions
-function useDeepEqual() {
-    if (lodashEqual === undefined) {
-        lodashEqual = require('lodash.isequal');
+class ok {
+    constructor(value) {
+        this.value = value;
+    }
+    isOk() {
+        return true;
+    }
+    isErr() {
+        return false;
+    }
+    ok() {
+        return Some(this.value);
+    }
+    err() {
+        return exports.None;
+    }
+    map(op) {
+        return Ok(op(this.value));
+    }
+    // @ts-ignore: noUnusedParameters
+    mapOrElse(fallback, map) {
+        return map(this.value);
+    }
+    // @ts-ignore: noUnusedParameters
+    mapErr(op) {
+        return Ok(this.value);
+    }
+    and(res) {
+        return res;
+    }
+    andThen(op) {
+        return op(this.value);
+    }
+    // @ts-ignore: noUnusedParameters
+    or(res) {
+        return this;
+    }
+    // @ts-ignore: noUnusedParameters
+    orElse(op) {
+        return this;
+    }
+    // @ts-ignore: noUnusedParameters
+    unwrapOr(optb) {
+        return this.value;
+    }
+    // @ts-ignore: noUnusedParameters
+    unwrapOrElse(op) {
+        return this.value;
+    }
+    unwrap() {
+        return this.value;
+    }
+    // @ts-ignore: noUnusedParameters
+    expect(msg) {
+        return this.value;
+    }
+    unwrapErr() {
+        throw new Error(String(this.value));
+    }
+    expectErr(msg) {
+        throw new Error(msg + ': ' + String(this.value));
+    }
+    transpose() {
+        if (this.value instanceof some) {
+            return Some(Ok(this.value.unwrap()));
+        }
+        else if (this.value instanceof none) {
+            return exports.None;
+        }
+        else {
+            throw new Error('value is not Option!');
+        }
+    }
+    equal(resb, deep) {
+        if (deep) {
+            return resb.isOk() && lodash_isequal_1.default(this.value, resb.unwrap());
+        }
+        else {
+            return resb.isOk() && this.value === resb.unwrap();
+        }
     }
 }
-exports.useDeepEqual = useDeepEqual;
-function optionEqual(opta, optb, deep = false) {
-    return opta.isNone() && optb.isNone()
-        || (opta.isSome() && optb.isSome() && opta.equal(optb, deep));
+class err {
+    constructor(error) {
+        this.error = error;
+    }
+    isOk() {
+        return false;
+    }
+    isErr() {
+        return true;
+    }
+    ok() {
+        return exports.None;
+    }
+    err() {
+        return Some(this.error);
+    }
+    // @ts-ignore: noUnusedParameters
+    map(op) {
+        return Err(this.error);
+    }
+    // @ts-ignore: noUnusedParameters
+    mapOrElse(fallback, map) {
+        return fallback(this.error);
+    }
+    mapErr(op) {
+        return Err(op(this.error));
+    }
+    // @ts-ignore: noUnusedParameters
+    and(res) {
+        return Err(this.error);
+    }
+    // @ts-ignore: noUnusedParameters
+    andThen(op) {
+        return Err(this.error);
+    }
+    or(res) {
+        return res;
+    }
+    orElse(op) {
+        return op(this.error);
+    }
+    unwrapOr(optb) {
+        return optb;
+    }
+    unwrapOrElse(op) {
+        return op(this.error);
+    }
+    unwrap() {
+        throw new Error(String(this.error));
+    }
+    expect(msg) {
+        throw new Error(msg + ': ' + String(this.error));
+    }
+    unwrapErr() {
+        return this.error;
+    }
+    // @ts-ignore: noUnusedParameters
+    expectErr(msg) {
+        return this.error;
+    }
+    transpose() {
+        return Some(Err(this.error));
+    }
+    // @ts-ignore: noUnusedParameters
+    equal(resb, deep) {
+        return resb.isErr();
+    }
 }
-exports.optionEqual = optionEqual;
+function Ok(value) {
+    return new ok(value);
+}
+exports.Ok = Ok;
+function Err(error) {
+    return new err(error);
+}
+exports.Err = Err;
+// helper functions
 function makeMatch(branches, deep = false) {
-    return x => {
+    return (x) => {
         for (let i = 0, len = branches.length; i < len; i++) {
-            const [optb, blockFn] = branches[i];
-            if (blockFn) {
-                if (x.equal(optb, deep)) {
-                    return blockFn();
-                }
+            const branch = branches[i];
+            if (typeof branch === 'function') { // default
+                return branch(x);
             }
-            else { // default
-                return optb();
+            else {
+                if (x.equal(branch[0], deep)) {
+                    return branch[1]();
+                }
             }
         }
         // no match, not allow
-        throw new Error('Option must match at least one branch');
+        throw new Error('non-exhaustive patterns');
     };
 }
 exports.makeMatch = makeMatch;
@@ -164,3 +324,4 @@ function match(opt, branches, deep = false) {
     return makeMatch(branches, deep)(opt);
 }
 exports.match = match;
+//# sourceMappingURL=index.js.map
