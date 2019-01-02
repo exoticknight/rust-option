@@ -1,12 +1,10 @@
 import test from 'tape'
 
 import {
-  Option,
   Some,
   None,
   match,
 
-  Result,
   Ok,
   Err,
 } from '../src'
@@ -191,9 +189,26 @@ test('equal', t => {
 })
 
 test('transpose', t => {
-  let x:Result<Option<number>, string> = Ok(Some(5))
-  let y:Option<Result<number, string>> = Some(Ok(5))
-  t.true(x.equal(y.transpose()))
+  t.true(Ok(Some(5)).equal(Some(Ok(5)).transpose()))
+
+  t.true(Err('error here').equal(Some(Err('error here')).transpose()))
+
+  t.true(Ok(None).equal(None.transpose()))
+
+  try {
+    Some(1).transpose()
+  } catch (error) {
+    t.pass('should throw error if value is not Result')
+  }
+
+  t.end()
+})
+
+test('nested', t => {
+  t.true(Some(Some(5)).equal(Some(Some(5))))
+  t.true(Some(None).equal(Some(None)))
+  t.true(Some(Ok(5)).equal(Some(Ok(5))))
+  t.true(Some(Err(5)).equal(Some(Err(5))))
 
   t.end()
 })

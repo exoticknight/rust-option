@@ -1,4 +1,5 @@
 import {Result} from './IResult'
+import { match } from '.';
 
 export interface Option<T> {
   /** rust methods below */
@@ -163,4 +164,14 @@ export interface Option<T> {
    * @memberof Option
    */
   equal(optb:Option<T>, deep?:boolean):boolean
+
+  /**
+   * return true if Option's value matches to optb's.
+   *
+   * @param {Option<T>} optb
+   * @param {boolean} [deep]
+   * @returns {boolean}
+   * @memberof Option
+   */
+  match(optb:Option<T>, deep?:boolean):boolean
 }

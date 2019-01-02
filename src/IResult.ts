@@ -191,8 +191,19 @@ export interface Result<T, E> {
    * return true if Result's value equals to resb's.
    *
    * @param {Result<T, E>} resb
+   * @param {boolean} [deep]
    * @returns {boolean}
    * @memberof Result
    */
   equal(resb:Result<T, E>, deep?:boolean):boolean
+
+  /**
+   * return true if Result's value matches to resb's
+   *
+   * @param {Option<T>} resb
+   * @param {boolean} [deep]
+   * @returns {boolean}
+   * @memberof Result
+   */
+  match(resb:Result<T, E>, deep?:boolean):boolean
 }

@@ -4,8 +4,94 @@ export import Option = a.Option
 import b = require('./IResult')
 export import Result = b.Result
 
-import { Result } from './IResult'
 import { Option } from './IOption'
+import { Result } from './IResult'
+
+function matchObject(value:any, matcher:any, getValue:Function, deep:boolean):boolean {
+  const mProps = Object.getOwnPropertyNames(matcher)
+  return mProps.every(p => innerMatch(value[p], matcher[p], getValue, deep))
+}
+
+function innerMatch(thisValue:any, value:any, getValue:Function, deep:boolean):boolean {
+  // recursive
+  if ((value instanceof some && thisValue instanceof some)
+    || (value instanceof ok && thisValue instanceof ok)
+    || (value instanceof err && thisValue instanceof err)) {
+    return innerMatch(getValue(thisValue), getValue(value), getValue, deep)
+  }
+
+  let isMatch = false
+
+  // equal is a kind of perfect match
+  if (deep) {
+    isMatch = lodashEqual(thisValue, value)
+  } else {
+    isMatch = (thisValue === value) || (Number.isNaN(thisValue) && Number.isNaN(value))
+  }
+  if (isMatch) return true
+
+  // check basic type
+  // following statements are all true
+  // Some(1).match(Some(Number))
+  // Some('yeah').match(Some(String))
+  // Some(false).match(Some(Boolean))
+  // Some(function f(){}).match(Some(Function))
+  // Some(Date.now()).match(Some(Date))
+  // Some([1,2,4]).match(Some(Array))
+  // Some(/foo/).match(Some(RegExp))
+  // Some(new Set).match(Some(Set))
+  // Some(new Map).match(Some(Map))
+  const type = Object.prototype.toString.call(thisValue).slice(8, -1)
+  switch (type) {
+    case 'Number':
+      value === Number && (isMatch = true)
+      break
+    case 'String':
+      value === String && (isMatch = true)
+      break
+    case 'Boolean':
+      value === Boolean && (isMatch = true)
+      break
+    case 'Function':
+      value === Function && (isMatch = true)
+      break
+    case 'Date':
+      value === Date && (isMatch = true)
+      break
+    case 'Array':
+      value === Array && (isMatch = true)
+      break
+    case 'RegExp':
+      value === RegExp && (isMatch = true)
+      break
+    case 'Map':
+      value === Map && (isMatch = true)
+      break
+    case 'Set':
+      value === Set && (isMatch = true)
+      break
+    case 'Object':
+      // class A {}
+      // new A match A
+      // new B match A if B extends A
+      switch (Object.prototype.toString.call(value).slice(8, -1)) {
+        case 'Function':
+          thisValue instanceof value && (isMatch = true)
+          break
+        case 'Object':
+          isMatch = matchObject(thisValue, value, getValue, deep)
+          break
+        default:
+          break;
+      }
+      break
+    default:
+      break
+  }
+  if (isMatch) return true
+
+  return false
+}
 
 class some<T> implements Option<T> {
   private value:T
@@ -80,22 +166,47 @@ class some<T> implements Option<T> {
     return optb.isNone() ? this : None
   }
 
-  transpose<T, E>():Result<Option<T>, E> {
+  transpose<U, E>():Result<Option<U>, E> {
     if (this.value instanceof ok) {
-      return Ok(Some(<T>this.value.unwrap()))
+      return Ok(Some(this.value.unwrap()))
     } else if (this.value instanceof err) {
-      return Err(<E>this.value.unwrap())
+      return Err(<E>this.value.unwrapErr())
     } else {
       throw new Error('value is not Result!')
     }
   }
 
   equal(optb:Option<T>, deep:boolean=false):boolean {
-    if (deep) {
-      return optb.isSome() && lodashEqual(this.value, optb.unwrap())
-    } else {
-      return optb.isSome() && this.value === optb.unwrap()
+    if (optb.isSome()) {
+      const value = optb.unwrap()
+      // recursive
+      if (value instanceof some && this.value instanceof some) {
+        return this.value.equal(value, deep)
+      }
+      if (value instanceof ok && this.value instanceof ok) {
+        return this.value.equal(value, deep)
+      }
+      if (value instanceof err && this.value instanceof err) {
+        return this.value.equal(value, deep)
+      }
+
+      // check
+      if (deep) {
+        return lodashEqual(this.value, value)
+      } else {
+        return (this.value === value) || (Number.isNaN(<any>this.value) && Number.isNaN(<any>value))
+      }
     }
+    return false
+  }
+
+  match(optb:Option<T>, deep:boolean=false):boolean {
+    if (optb.isSome()) {
+      const value = <any>optb.unwrap()
+      return innerMatch(this.value, value, (x:Option<T>)=>x.isSome()?x.unwrap():None, deep)
+    }
+
+    return false
   }
 }
 
@@ -172,6 +283,10 @@ class none<T> implements Option<T> {
   }
 
   equal(optb:Option<any>):boolean {
+    return optb.isNone()
+  }
+
+  match(optb:Option<any>):boolean {
     return optb.isNone()
   }
 }
@@ -275,11 +390,33 @@ class ok<T, E> implements Result<T, E>  {
   }
 
   equal(resb:Result<T, E>, deep?:boolean):boolean {
-    if (deep) {
-      return resb.isOk() && lodashEqual(this.value, resb.unwrap())
-    } else {
-      return resb.isOk() && this.value === resb.unwrap()
+    if (resb.isOk()) {
+      const value = resb.unwrap()
+      if (value instanceof some && this.value instanceof some) {
+        return this.value.equal(value, deep)
+      }
+      if (value instanceof ok && this.value instanceof ok) {
+        return this.value.equal(value, deep)
+      }
+      if (value instanceof err && this.value instanceof err) {
+        return this.value.equal(value, deep)
+      }
+      if (deep) {
+        return lodashEqual(this.value, value)
+      } else {
+        return this.value === value
+      }
     }
+    return false
+  }
+
+  match(resb:Result<T, E>, deep:boolean=false):boolean {
+    if (resb.isOk()) {
+      const value = <any>resb.unwrap()
+      return innerMatch(this.value, value, (x:Result<T, E>)=>x[x.isOk()? 'unwrap' : 'unwrapErr'](), deep)
+    }
+
+    return false
   }
 }
 
@@ -369,7 +506,33 @@ class err<T, E> implements Result<T, E> {
 
   // @ts-ignore: noUnusedParameters
   equal<T>(resb:Result<T, E>, deep?:boolean):boolean {
-    return resb.isErr()
+    if (resb.isErr()) {
+      const error = resb.unwrapErr()
+      if (error instanceof some && this.error instanceof some) {
+        return this.error.equal(error, deep)
+      }
+      if (error instanceof ok && this.error instanceof ok) {
+        return this.error.equal(error, deep)
+      }
+      if (error instanceof err && this.error instanceof err) {
+        return this.error.equal(error, deep)
+      }
+      if (deep) {
+        return lodashEqual(this.error, error)
+      } else {
+        return this.error === error
+      }
+    }
+    return false
+  }
+
+  match(resb:Result<T, E>, deep:boolean=false):boolean {
+    if (resb.isErr()) {
+      const error = <any>resb.unwrapErr()
+      return innerMatch(this.error, error, (x:Result<T, E>)=>x[x.isOk()? 'unwrap' : 'unwrapErr'](), deep)
+    }
+
+    return false
   }
 }
 
@@ -403,3 +566,15 @@ export function makeMatch<T>(branches:(((x:Option<T>)=>any) | [Option<any>, (x?:
 export function match<T>(opt:Option<T>, branches:(((x:Option<T>)=>any) | [Option<any>, (x?:Option<T>)=>any])[], deep:boolean=false):any {
   return makeMatch<T>(branches, deep)(opt)
 }
+
+class A{}
+class B extends A{}
+
+console.log(
+  innerMatch(
+    new B,
+    A,
+    (x:any) => x.unwrap(),
+    true
+  )
+)

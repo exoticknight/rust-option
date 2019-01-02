@@ -191,6 +191,18 @@ test('expectErr', t => {
   t.end()
 })
 
+test('transpose', t => {
+  t.pass()
+
+  t.end()
+})
+
+test('nest', t => {
+  t.pass()
+
+  t.end()
+})
+
 test('equal / deepEqual', t => {
   let x:Result<number, string> = Ok(3)
   let obj:Result<{x:number}, string> = Ok({x:1})
