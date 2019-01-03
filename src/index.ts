@@ -566,15 +566,3 @@ export function makeMatch<T>(branches:(((x:Option<T>)=>any) | [Option<any>, (x?:
 export function match<T>(opt:Option<T>, branches:(((x:Option<T>)=>any) | [Option<any>, (x?:Option<T>)=>any])[], deep:boolean=false):any {
   return makeMatch<T>(branches, deep)(opt)
 }
-
-class A{}
-class B extends A{}
-
-console.log(
-  innerMatch(
-    new B,
-    A,
-    (x:any) => x.unwrap(),
-    true
-  )
-)
