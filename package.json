@@ -38,7 +38,8 @@
     "xor",
     "equal",
     "rustoption",
-    "rustresult"
+    "rustresult",
+    "match"
   ],
   "author": {
     "email": "draco.knight0@gmail.com",

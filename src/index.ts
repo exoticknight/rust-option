@@ -7,68 +7,71 @@ export import Result = b.Result
 import { Option } from './IOption'
 import { Result } from './IResult'
 
-function matchObject(value:any, matcher:any, getValue:Function, deep:boolean):boolean {
-  const mProps = Object.getOwnPropertyNames(matcher)
-  return mProps.every(p => innerMatch(value[p], matcher[p], getValue, deep))
+
+function normalEqual(left:any, right:any, deep:boolean):boolean {
+  if (deep) {
+    return lodashEqual(left, right)
+  } else {
+    return (left === right) || (Number.isNaN(left) && Number.isNaN(right))
+  }
 }
 
-function innerMatch(thisValue:any, value:any, getValue:Function, deep:boolean):boolean {
-  // recursive
-  if ((value instanceof some && thisValue instanceof some)
-    || (value instanceof ok && thisValue instanceof ok)
-    || (value instanceof err && thisValue instanceof err)) {
-    return innerMatch(getValue(thisValue), getValue(value), getValue, deep)
-  }
+function matchObject(value:any, matcher:any, deep:boolean):boolean {
+  const mProps = Object.getOwnPropertyNames(matcher)
+  return mProps.every(p => isMatch(value[p], matcher[p], deep))
+}
 
-  let isMatch = false
+function isMatch(thisValue:any, value:any, deep:boolean):boolean {
+  // recursive
+  if (value instanceof some) return thisValue instanceof some && isMatch(thisValue.unwrap(), value.unwrap(), deep)
+  if (value instanceof ok) return thisValue instanceof ok && isMatch(thisValue.unwrap(), value.unwrap(), deep)
+  if (value instanceof err) return thisValue instanceof err && isMatch(thisValue.unwrapErr(), value.unwrapErr(), deep)
+  if (value instanceof none) return thisValue instanceof none
+
+  let matchFound = false
 
   // equal is a kind of perfect match
-  if (deep) {
-    isMatch = lodashEqual(thisValue, value)
-  } else {
-    isMatch = (thisValue === value) || (Number.isNaN(thisValue) && Number.isNaN(value))
-  }
-  if (isMatch) return true
+  if (normalEqual(thisValue, value, deep)) return true
 
   // check basic type
   // following statements are all true
-  // Some(1).match(Some(Number))
-  // Some('yeah').match(Some(String))
-  // Some(false).match(Some(Boolean))
-  // Some(function f(){}).match(Some(Function))
-  // Some(Date.now()).match(Some(Date))
-  // Some([1,2,4]).match(Some(Array))
-  // Some(/foo/).match(Some(RegExp))
-  // Some(new Set).match(Some(Set))
-  // Some(new Map).match(Some(Map))
+  // Some(1) match Some(Number)
+  // Some('yeah') match Some(String)
+  // Some(false) match Some(Boolean)
+  // Some(function f(){}) match Some(Function)
+  // Some(new Date) match Some(Date)
+  // Some([1,2,4]) match Some(Array)
+  // Some(/foo/) match Some(RegExp)
+  // Some(new Set) match Some(Set)
+  // Some(new Map) match Some(Map)
   const type = Object.prototype.toString.call(thisValue).slice(8, -1)
   switch (type) {
     case 'Number':
-      value === Number && (isMatch = true)
+      value === Number && (matchFound = true)
       break
     case 'String':
-      value === String && (isMatch = true)
+      value === String && (matchFound = true)
       break
     case 'Boolean':
-      value === Boolean && (isMatch = true)
+      value === Boolean && (matchFound = true)
       break
     case 'Function':
-      value === Function && (isMatch = true)
+      value === Function && (matchFound = true)
       break
     case 'Date':
-      value === Date && (isMatch = true)
+      value === Date && (matchFound = true)
       break
     case 'Array':
-      value === Array && (isMatch = true)
+      value === Array && (matchFound = true)
       break
     case 'RegExp':
-      value === RegExp && (isMatch = true)
+      value === RegExp && (matchFound = true)
       break
     case 'Map':
-      value === Map && (isMatch = true)
+      value === Map && (matchFound = true)
       break
     case 'Set':
-      value === Set && (isMatch = true)
+      value === Set && (matchFound = true)
       break
     case 'Object':
       // class A {}
@@ -76,10 +79,10 @@ function innerMatch(thisValue:any, value:any, getValue:Function, deep:boolean):b
       // new B match A if B extends A
       switch (Object.prototype.toString.call(value).slice(8, -1)) {
         case 'Function':
-          thisValue instanceof value && (isMatch = true)
+          thisValue instanceof value && (matchFound = true)
           break
         case 'Object':
-          isMatch = matchObject(thisValue, value, getValue, deep)
+          matchFound = matchObject(thisValue, value, deep)
           break
         default:
           break;
@@ -88,9 +91,23 @@ function innerMatch(thisValue:any, value:any, getValue:Function, deep:boolean):b
     default:
       break
   }
-  if (isMatch) return true
+  if (matchFound) return true
 
   return false
+}
+
+function isEqual(thisValue:any, value:any, deep:boolean):boolean {
+  // recursive
+  if ((value instanceof some && thisValue instanceof some)
+    || (value instanceof ok && thisValue instanceof ok)) {
+    return isEqual(thisValue.unwrap(), value.unwrap(), deep)
+  }
+  if (value instanceof err && thisValue instanceof err) {
+    return isEqual(thisValue.unwrapErr(), value.unwrapErr(), deep)
+  }
+
+  // check
+  return normalEqual(thisValue, value, deep)
 }
 
 class some<T> implements Option<T> {
@@ -166,47 +183,18 @@ class some<T> implements Option<T> {
     return optb.isNone() ? this : None
   }
 
-  transpose<U, E>():Result<Option<U>, E> {
+  transpose():any {
     if (this.value instanceof ok) {
       return Ok(Some(this.value.unwrap()))
     } else if (this.value instanceof err) {
-      return Err(<E>this.value.unwrapErr())
+      return Err(this.value.unwrapErr())
     } else {
       throw new Error('value is not Result!')
     }
   }
 
   equal(optb:Option<T>, deep:boolean=false):boolean {
-    if (optb.isSome()) {
-      const value = optb.unwrap()
-      // recursive
-      if (value instanceof some && this.value instanceof some) {
-        return this.value.equal(value, deep)
-      }
-      if (value instanceof ok && this.value instanceof ok) {
-        return this.value.equal(value, deep)
-      }
-      if (value instanceof err && this.value instanceof err) {
-        return this.value.equal(value, deep)
-      }
-
-      // check
-      if (deep) {
-        return lodashEqual(this.value, value)
-      } else {
-        return (this.value === value) || (Number.isNaN(<any>this.value) && Number.isNaN(<any>value))
-      }
-    }
-    return false
-  }
-
-  match(optb:Option<T>, deep:boolean=false):boolean {
-    if (optb.isSome()) {
-      const value = <any>optb.unwrap()
-      return innerMatch(this.value, value, (x:Option<T>)=>x.isSome()?x.unwrap():None, deep)
-    }
-
-    return false
+    return optb.isSome() && isEqual(this.value, optb.unwrap(), deep)
   }
 }
 
@@ -278,15 +266,11 @@ class none<T> implements Option<T> {
     return optb.isSome() ? optb : this
   }
 
-  transpose<E>():Result<Option<any>, E> {
+  transpose():any {
     return Ok(this)
   }
 
   equal(optb:Option<any>):boolean {
-    return optb.isNone()
-  }
-
-  match(optb:Option<any>):boolean {
     return optb.isNone()
   }
 }
@@ -297,7 +281,7 @@ export function Some<T>(value:T):Option<T> {
 
 export const None:Option<any> = new none
 
-class ok<T, E> implements Result<T, E>  {
+class ok<T, E> implements Result<T, E> {
   private value:T
 
   constructor(value:T) {
@@ -379,7 +363,7 @@ class ok<T, E> implements Result<T, E>  {
     throw new Error(msg + ': ' + String(this.value))
   }
 
-  transpose():Option<Result<T, E>> {
+  transpose():any {
     if (this.value instanceof some) {
       return Some(Ok(this.value.unwrap()))
     } else if (this.value instanceof none) {
@@ -389,34 +373,8 @@ class ok<T, E> implements Result<T, E>  {
     }
   }
 
-  equal(resb:Result<T, E>, deep?:boolean):boolean {
-    if (resb.isOk()) {
-      const value = resb.unwrap()
-      if (value instanceof some && this.value instanceof some) {
-        return this.value.equal(value, deep)
-      }
-      if (value instanceof ok && this.value instanceof ok) {
-        return this.value.equal(value, deep)
-      }
-      if (value instanceof err && this.value instanceof err) {
-        return this.value.equal(value, deep)
-      }
-      if (deep) {
-        return lodashEqual(this.value, value)
-      } else {
-        return this.value === value
-      }
-    }
-    return false
-  }
-
-  match(resb:Result<T, E>, deep:boolean=false):boolean {
-    if (resb.isOk()) {
-      const value = <any>resb.unwrap()
-      return innerMatch(this.value, value, (x:Result<T, E>)=>x[x.isOk()? 'unwrap' : 'unwrapErr'](), deep)
-    }
-
-    return false
+  equal(resb:Result<T, E>, deep:boolean=false):boolean {
+    return resb.isOk() && isEqual(this.value, resb.unwrap(), deep)
   }
 }
 
@@ -500,39 +458,12 @@ class err<T, E> implements Result<T, E> {
     return this.error
   }
 
-  transpose():Option<Result<T, E>> {
+  transpose():any {
     return Some(Err(this.error))
   }
 
-  // @ts-ignore: noUnusedParameters
-  equal<T>(resb:Result<T, E>, deep?:boolean):boolean {
-    if (resb.isErr()) {
-      const error = resb.unwrapErr()
-      if (error instanceof some && this.error instanceof some) {
-        return this.error.equal(error, deep)
-      }
-      if (error instanceof ok && this.error instanceof ok) {
-        return this.error.equal(error, deep)
-      }
-      if (error instanceof err && this.error instanceof err) {
-        return this.error.equal(error, deep)
-      }
-      if (deep) {
-        return lodashEqual(this.error, error)
-      } else {
-        return this.error === error
-      }
-    }
-    return false
-  }
-
-  match(resb:Result<T, E>, deep:boolean=false):boolean {
-    if (resb.isErr()) {
-      const error = <any>resb.unwrapErr()
-      return innerMatch(this.error, error, (x:Result<T, E>)=>x[x.isOk()? 'unwrap' : 'unwrapErr'](), deep)
-    }
-
-    return false
+  equal<T>(resb:Result<T, E>, deep:boolean=false):boolean {
+    return resb.isErr() && isEqual(this.error, resb.unwrapErr(), deep)
   }
 }
 
@@ -545,14 +476,14 @@ export function Err<E>(error:E):Result<any, E> {
 }
 
 // helper functions
-export function makeMatch<T>(branches:(((x:Option<T>)=>any) | [Option<any>, (x?:Option<T>)=>any])[], deep:boolean=false):(opt:Option<T>)=>any {
-  return (x:Option<T>) => {
+export function makeMatch(branches:(((x:any)=>any) | [any, (x?:any)=>any])[], deep:boolean=false):(opt:any)=>any {
+  return (x:any) => {
     for(let i=0,len=branches.length; i<len; i++) {
       const branch = branches[i]
       if (typeof branch === 'function') {  // default
         return branch(x)
       } else {
-        if (x.equal(branch[0], deep)) {
+        if (isMatch(x, branch[0], deep)) {
           return branch[1]()
         }
       }
@@ -563,6 +494,6 @@ export function makeMatch<T>(branches:(((x:Option<T>)=>any) | [Option<any>, (x?:
   }
 }
 
-export function match<T>(opt:Option<T>, branches:(((x:Option<T>)=>any) | [Option<any>, (x?:Option<T>)=>any])[], deep:boolean=false):any {
-  return makeMatch<T>(branches, deep)(opt)
+export function match(opt:any, branches:(((x:any)=>any) | [any, (x?:any)=>any])[], deep:boolean=false):any {
+  return makeMatch(branches, deep)(opt)
 }

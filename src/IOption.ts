@@ -1,5 +1,4 @@
 import {Result} from './IResult'
-import { match } from '.';
 
 export interface Option<T> {
   /** rust methods below */
@@ -146,13 +145,12 @@ export interface Option<T> {
   /**
    * Transposes an Option of a Result into a Result of an Option.
    *
-   * None will be mapped to Ok(None). Some(Ok(_)) and Some(Err(_)) will be mapped to Ok(Some(_)) and Err(_).
+   * None will be mapped to Ok(None). Some(Ok(\_)) and Some(Err(\_)) will be mapped to Ok(Some(\_)) and Err(\_).
    *
-   * @template E
-   * @returns {Result<Option<T>, E>}
+   * @returns {Result<T extends Result<infer U, any> ? Option<U> : never, T extends Result<any, infer F> ? F : never>}
    * @memberof Option
    */
-  transpose<T, E>():Result<Option<T>, E>
+  transpose():Result<T extends Result<infer U, any> ? Option<U> : never, T extends Result<any, infer F> ? F : never>
   /** rust methods above */
 
   // helper methods
@@ -164,14 +162,4 @@ export interface Option<T> {
    * @memberof Option
    */
   equal(optb:Option<T>, deep?:boolean):boolean
-
-  /**
-   * return true if Option's value matches to optb's.
-   *
-   * @param {Option<T>} optb
-   * @param {boolean} [deep]
-   * @returns {boolean}
-   * @memberof Option
-   */
-  match(optb:Option<T>, deep?:boolean):boolean
 }

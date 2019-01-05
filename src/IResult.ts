@@ -178,12 +178,13 @@ export interface Result<T, E> {
   /**
    * Transposes a Result of an Option into an Option of a Result.
    *
-   * Ok(None) will be mapped to None. Ok(Some(_)) and Err(_) will be mapped to Some(Ok(_)) and Some(Err(_)).
+   * Ok(None) will be mapped to None. Ok(Some(\_)) and Err(\_) will be mapped to Some(Ok(\_)) and Some(Err(\_)).
    *
-   * @returns {Option<Result<T, E>>}
+   * @returns {Option<T extends Option<infer U> ? Result<U, E> : never>}
    * @memberof Result
    */
-  transpose():Option<Result<T, E>>
+  // transpose():Option<T extends Option<infer U> ? Result<U, E> : never>
+  transpose():Option<T extends Option<infer U> ? Result<U, E> : never>
   /** rust method above */
 
   // helper method
@@ -196,14 +197,4 @@ export interface Result<T, E> {
    * @memberof Result
    */
   equal(resb:Result<T, E>, deep?:boolean):boolean
-
-  /**
-   * return true if Result's value matches to resb's
-   *
-   * @param {Option<T>} resb
-   * @param {boolean} [deep]
-   * @returns {boolean}
-   * @memberof Result
-   */
-  match(resb:Result<T, E>, deep?:boolean):boolean
 }

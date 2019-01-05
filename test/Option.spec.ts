@@ -3,7 +3,6 @@ import test from 'tape'
 import {
   Some,
   None,
-  match,
 
   Ok,
   Err,
@@ -162,7 +161,7 @@ test('xor', t => {
   t.end()
 })
 
-test('equal', t => {
+test('equal / deepEqual', t => {
   let x = Some(2)
   let y = Some(2)
   t.true(x.equal(y))
@@ -212,54 +211,3 @@ test('nested', t => {
 
   t.end()
 })
-
-test('match', t => {
-  match(Some(2), [
-    [None, () => t.fail('Some not match')],
-    [Some(1), () => t.fail('Some not match')],
-    [Some(2), () => t.pass('Some match')],
-    () => t.fail('Some not match'),
-  ])
-
-  match(None, [
-    [Some(1), () => t.fail('None not match')],
-    [None, () => t.pass('None match')],
-    () => t.fail('None not match'),
-  ])
-
-  // default match
-  match(Some(3), [
-    [Some(1), () => t.fail('default not match')],
-    [Some(2), () => t.fail('default not match')],
-    x => t.true(x.equal(Some(3))),
-  ])
-
-  // no match
-  try {
-    match(Some(3), [
-      [Some(1), () => t.fail('no match')],
-      [Some(2), () => t.fail('no match')],
-    ])
-  } catch (error) {
-    t.pass('should throws no match')
-  }
-
-  // greedy match
-  match(Some(3), [
-    [Some(1), () => t.fail('greedy not match')],
-    () => t.pass('greedy match'),
-    [Some(3), () => t.fail('greedy not match')],
-  ])
-
-  // deep match
-  match(Some({foo: 1}), [
-    [None, () => t.fail('deep not match')],
-    [Some({foo: 2}), () => t.fail('deep not match')],
-    [Some({foo: 1}), () => t.pass('deep match')],
-    () => t.fail('deep not match'),
-  ], true)
-
-  t.end()
-})
-
-Err

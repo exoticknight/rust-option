@@ -192,25 +192,56 @@ test('expectErr', t => {
 })
 
 test('transpose', t => {
-  t.pass()
+  t.true(Some(Ok(5)).equal(Ok(Some(5)).transpose()))
 
-  t.end()
-})
+  t.true(Some(Err('error here')).equal(Err('error here').transpose()))
 
-test('nest', t => {
-  t.pass()
+  t.true(None.equal(Ok(None).transpose()))
+
+  try {
+    Ok(1).transpose()
+  } catch (error) {
+    t.pass('should throw error if value is not Option')
+  }
 
   t.end()
 })
 
 test('equal / deepEqual', t => {
   let x:Result<number, string> = Ok(3)
-  let obj:Result<{x:number}, string> = Ok({x:1})
+  let y:Result<number, string> = Err('error')
+  let objx:Result<{x:number}, string> = Ok({x:1})
+  let objy:Result<{x:number}, {x:number}> = Err({x:1})
 
-  x.equal(Ok(3))
+  let nan:Result<number, number> = Ok(NaN)
 
-  t.false(obj.equal(Ok({x:1})))
-  t.true(obj.equal(Ok({x:1}), true))
+  t.true(x.equal(Ok(3)))
+  t.false(x.equal(Err('error')))
+
+  t.true(y.equal(Err('error')))
+  t.false(y.equal(Ok(3)))
+
+  t.false(objx.equal(Ok({x:1})))
+  t.true(objx.equal(Ok({x:1}), true))
+
+  t.false(objy.equal(Err({x:1})))
+  t.true(objy.equal(Err({x:1}), true))
+
+  t.true(nan.equal(Ok(NaN)))
+
+  t.end()
+})
+
+test('nest', t => {
+  t.true(Ok(Ok(5)).equal(Ok(Ok(5))))
+  t.true(Ok(Err('error')).equal(Ok(Err('error'))))
+  t.true(Ok(Some(5)).equal(Ok(Some(5))))
+  t.true(Ok(None).equal(Ok(None)))
+
+  t.true(Err(Err(5)).equal(Err(Err(5))))
+  t.true(Err(Ok('error')).equal(Err(Ok('error'))))
+  t.true(Err(Some(5)).equal(Err(Some(5))))
+  t.true(Err(None).equal(Err(None)))
 
   t.end()
 })
