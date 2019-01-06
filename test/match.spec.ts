@@ -8,6 +8,7 @@ import {
   Err,
 
   match,
+  makeMatch,
 } from '../src'
 
 test('match Option', t => {
@@ -103,9 +104,20 @@ test('match normal', t => {
 
   class A {}
   class B extends A {}
+  class C {}
+  match(new C, [[A, () => t.fail('new C not match A')], [C, () => t.pass('match instance')]])
   match(new A, [[A, () => t.pass('match instance')], () => t.fail('not match instance')])
   match(new B, [[A, () => t.pass('match inherit instance')], () => t.fail('not match inherit instance')])
+
+  match(undefined, [[1, () => t.fail('undefined not match 1')], () => t.pass('match undefined')])
+  match(undefined, [[undefined, () => t.pass('undefined match')], () => t.fail('not match undefined')])
+  match(null, [[null, () => t.pass('null match')], () => t.fail('not match null')])
 
   t.end()
 })
 
+test('makeMatch', t => {
+  makeMatch([[1, () => t.pass('makeMatch 1')], () => t.fail('not match 1')])(1)
+
+  t.end()
+})
