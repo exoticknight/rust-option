@@ -9,6 +9,8 @@ import {
 
   match,
   makeMatch,
+
+  Arguments,
 } from '../src'
 
 test('match Option', t => {
@@ -83,7 +85,8 @@ test('match Result', t => {
   ], true)
 
   // nest
-  match(Ok(Some(1)), [
+  let x = Some(1)
+  match(Ok(x), [
     [Ok(1), () => t.fail('not match Some(1)')],
     [Ok(Some(1)), () => t.pass('nest match')]
   ])
@@ -93,14 +96,30 @@ test('match Result', t => {
 
 test('match normal', t => {
   match(1, [[Number, () => t.pass('match 1')], () => t.fail('not match Number')])
+  match(NaN, [[Number, () => t.pass('NaN is number')], () => t.fail('not match NaN')])
   match('str', [[String, () => t.pass('match String')], () => t.fail('not match String')])
   match(false, [[Boolean, () => t.pass('match Boolean')], () => t.fail('not match Boolean')])
   match(function f(){}, [[Function, () => t.pass('match Function')], () => t.fail('not match Function')])
-  match(new Date, [[Date, () => t.pass('match Date')], () => t.fail('not match Date')])
+  match(new Date('2000-01-01'), [[Date, () => t.pass('match Date')], () => t.fail('not match Date')])
+  match(new Date('2000-01-01'), [[new Date('2000-01-01'), () => t.pass('match Date')], () => t.fail('not match Date')])
   match([1,2,4], [[Array, () => t.pass('match Array')], () => t.fail('not match Array')])
   match(/foo/, [[RegExp, () => t.pass('match RegExp')], () => t.fail('not match RegExp')])
   match(new Set, [[Set, () => t.pass('match Set')], () => t.fail('not match Set')])
   match(new Map, [[Map, () => t.pass('match Map')], () => t.fail('not match Map')])
+  match(new WeakSet, [[WeakSet, () => t.pass('match WeakSet')], () => t.fail('not match WeakSet')])
+  match(new WeakMap, [[WeakMap, () => t.pass('match WeakMap')], () => t.fail('not match WeakMap')])
+  match(Symbol.iterator, [[Symbol, () => t.pass('match Symbol')], () => t.fail('not match Symbol')])
+  match(new Error('a'), [[Error, () => t.pass('match Error')], () => t.fail('not match Error')])
+
+  ;(function () {
+    match(arguments, [[Arguments, () => t.pass('match Arguments')], () => t.fail('not match Arguments')])
+  })()
+  match({}, [[Arguments, () => t.fail('{} match Arguments')], () => t.pass('{} not match Arguments')])
+
+  match({}, [[Object, () => t.pass('match object')], () => t.fail('not match object')])
+  match({a: 1, b: 2}, [[{a: 1}, () => t.pass('match object')], () => t.fail('not match object')])
+  match({a: 2, b: 2}, [[{a: Number}, () => t.pass('match object')], () => t.fail('not match object')])
+  match({a: 1}, [[{a: 1, b: 2}, () => t.fail('not match object')], () => t.pass('match object')])
 
   class A {}
   class B extends A {}
@@ -112,6 +131,7 @@ test('match normal', t => {
   match(undefined, [[1, () => t.fail('undefined not match 1')], () => t.pass('match undefined')])
   match(undefined, [[undefined, () => t.pass('undefined match')], () => t.fail('not match undefined')])
   match(null, [[null, () => t.pass('null match')], () => t.fail('not match null')])
+  match(NaN, [[NaN, () => t.pass('NaN match')], () => t.fail('not match NaN')])
 
   t.end()
 })

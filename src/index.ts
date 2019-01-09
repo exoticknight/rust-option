@@ -7,6 +7,11 @@ export import Result = b.Result
 import { Option } from './IOption'
 import { Result } from './IResult'
 
+export const Arguments = Symbol('Arguments')
+
+function getTag(sth:any):string {
+  return Object.prototype.toString.call(sth).slice(8, -1)
+}
 
 function normalEqual(left:any, right:any, deep:boolean):boolean {
   if (deep) {
@@ -34,17 +39,23 @@ function isMatch(thisValue:any, value:any, deep:boolean):boolean {
   if (normalEqual(thisValue, value, deep)) return true
 
   // check basic type
-  // following statements are all true
-  // Some(1) match Some(Number)
-  // Some('yeah') match Some(String)
-  // Some(false) match Some(Boolean)
-  // Some(function f(){}) match Some(Function)
-  // Some(new Date) match Some(Date)
-  // Some([1,2,4]) match Some(Array)
-  // Some(/foo/) match Some(RegExp)
-  // Some(new Set) match Some(Set)
-  // Some(new Map) match Some(Map)
-  const type = Object.prototype.toString.call(thisValue).slice(8, -1)
+  // 1 matchs Number
+  // NaN matches Number
+  // 'yeah' matchs String
+  // false matchs Boolean
+  // function f(){} matchs Function
+  // new Date matchs Date
+  // [1,2,4] matchs Array
+  // /foo/ matchs RegExp
+  // new Set matchs Set
+  // new Map matchs Map
+  // new WeakMap matchs WeakMap
+  // new WeakSet matchs WeakSet
+  // Symbol.iterator matchs Symbol
+  // arguments matches Arguments
+  // new Error matches Error
+  // {a:1 , b:2 } matchs object, matchs {a: 1}, matches {a: Number}
+  const type = getTag(thisValue)
   switch (type) {
     case 'Number':
       value === Number && (matchFound = true)
@@ -59,7 +70,7 @@ function isMatch(thisValue:any, value:any, deep:boolean):boolean {
       value === Function && (matchFound = true)
       break
     case 'Date':
-      value === Date && (matchFound = true)
+      matchFound = (value === Date) || (getTag(value) === 'Date' && thisValue.valueOf() === value.valueOf())
       break
     case 'Array':
       value === Array && (matchFound = true)
@@ -70,14 +81,29 @@ function isMatch(thisValue:any, value:any, deep:boolean):boolean {
     case 'Map':
       value === Map && (matchFound = true)
       break
+    case 'WeakMap':
+      value === WeakMap && (matchFound = true)
+      break
     case 'Set':
       value === Set && (matchFound = true)
+      break
+    case 'WeakSet':
+      value === WeakSet && (matchFound = true)
+      break
+    case 'Symbol':
+      value === Symbol && (matchFound = true)
+      break
+    case 'Arguments':
+      value === Arguments && (matchFound = true)
+      break
+    case 'Error':
+      value === Error && (matchFound = true)
       break
     case 'Object':
       // class A {}
       // new A match A
       // new B match A if B extends A
-      switch (Object.prototype.toString.call(value).slice(8, -1)) {
+      switch (getTag(value)) {
         case 'Function':
           thisValue instanceof value && (matchFound = true)
           break
