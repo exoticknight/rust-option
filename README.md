@@ -54,13 +54,54 @@ import {
   Some,
   None,
   match,
+  Ok,
+  Err,
 } from 'rust-option'
 
 let x = Some(2)
 let y = None
 ```
 
-a normal match
+equal(===) considered to be match
+
+```javascript
+match(1, [
+  [1, () => conso.log('match')],
+  () => console.log('not match ')
+])
+```
+
+handle type match
+
+```javascript
+match(1, [
+  [Number, (x) => conso.log(x)],
+  () => console.log('not match ')
+])
+```
+
+more matches
+
+**value**|**match**
+:-----:|:-----:
+1|1, Number
+NaN|NaN, Number
+'yeah'|'yeah', String
+false|false, Boolean
+function f(){}|Function
+new Date('2000-01-01')|new Date('2000-01-01'), Date
+[1,2,4]|Array
+/foo/|RegExp
+new Set|Set
+new Map|Map
+new WeakMap|WeakMap
+new WeakSet|WeakSet
+Symbol.iterator|Symbol
+arguments|Arguments
+new Error|Error
+{a:1, b:2 }|object, {a: 1}, {a: Number}
+
+normal match
 
 ```javascript
 match(x, [
@@ -80,11 +121,24 @@ match(x, [
 ])
 ```
 
-default' branch can get the matchee
+default branch can get the matchee
 
 ```javascript
 match(x, [
   m => console.log('default match get Some(2) as parameter')
+])
+```
+
+handle nested match
+```javascript
+let z = Ok(x)
+let w = Err('error')
+
+match(z, [
+  [Ok(Some(2)), () => console.log('match')],
+  [w, () => console.log('not match Err')],
+  // the 'default' match
+  () => console.log('not match default'),
 ])
 ```
 
