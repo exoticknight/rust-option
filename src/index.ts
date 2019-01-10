@@ -61,7 +61,7 @@ function isMatch(thisValue:any, value:any, deep:boolean):boolean {
       value === Number && (matchFound = true)
       break
     case 'String':
-      value === String && (matchFound = true)
+      matchFound = (value === String) || (getTag(value) === 'String' && thisValue.includes(value))
       break
     case 'Boolean':
       value === Boolean && (matchFound = true)
