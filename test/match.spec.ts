@@ -97,7 +97,9 @@ test('match Result', t => {
 test('match normal', t => {
   match(1, [[Number, () => t.pass('match 1')], () => t.fail('not match Number')])
   match(NaN, [[Number, () => t.pass('NaN is number')], () => t.fail('not match NaN')])
-  match('str', [[String, () => t.pass('match String')], () => t.fail('not match String')])
+  match('yeah', [['yeah', () => t.pass('match String')], () => t.fail('not match String')])
+  match('yeah', [['ea', () => t.pass('match String')], () => t.fail('not match String')])
+  match('yeah', [[String, () => t.pass('match String')], () => t.fail('not match String')])
   match(false, [[Boolean, () => t.pass('match Boolean')], () => t.fail('not match Boolean')])
   match(function f(){}, [[Function, () => t.pass('match Function')], () => t.fail('not match Function')])
   match(new Date('2000-01-01'), [[Date, () => t.pass('match Date')], () => t.fail('not match Date')])
