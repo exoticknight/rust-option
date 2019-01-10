@@ -129,13 +129,12 @@ export interface Option<T> {
     /**
      * Transposes an Option of a Result into a Result of an Option.
      *
-     * None will be mapped to Ok(None). Some(Ok(_)) and Some(Err(_)) will be mapped to Ok(Some(_)) and Err(_).
+     * None will be mapped to Ok(None). Some(Ok(\_)) and Some(Err(\_)) will be mapped to Ok(Some(\_)) and Err(\_).
      *
-     * @template E
-     * @returns {Result<Option<T>, E>}
+     * @returns {Result<T extends Result<infer U, any> ? Option<U> : never, T extends Result<any, infer F> ? F : never>}
      * @memberof Option
      */
-    transpose<T, E>(): Result<Option<T>, E>;
+    transpose(): Result<T extends Result<infer U, any> ? Option<U> : never, T extends Result<any, infer F> ? F : never>;
     /** rust methods above */
     /**
      * return true if Option's value equals to optb's.

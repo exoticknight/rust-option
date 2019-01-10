@@ -4,6 +4,131 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
+exports.Arguments = Symbol('Arguments');
+function getTag(sth) {
+    return Object.prototype.toString.call(sth).slice(8, -1);
+}
+function normalEqual(left, right, deep) {
+    if (deep) {
+        return lodash_isequal_1.default(left, right);
+    }
+    else {
+        return (left === right) || (Number.isNaN(left) && Number.isNaN(right));
+    }
+}
+function matchObject(value, matcher, deep) {
+    const mProps = Object.getOwnPropertyNames(matcher);
+    return mProps.every(p => isMatch(value[p], matcher[p], deep));
+}
+function isMatch(thisValue, value, deep) {
+    // recursive
+    if (value instanceof some)
+        return thisValue instanceof some && isMatch(thisValue.unwrap(), value.unwrap(), deep);
+    if (value instanceof ok)
+        return thisValue instanceof ok && isMatch(thisValue.unwrap(), value.unwrap(), deep);
+    if (value instanceof err)
+        return thisValue instanceof err && isMatch(thisValue.unwrapErr(), value.unwrapErr(), deep);
+    if (value instanceof none)
+        return thisValue instanceof none;
+    let matchFound = false;
+    // equal is a kind of perfect match
+    if (normalEqual(thisValue, value, deep))
+        return true;
+    // check basic type
+    // 1 matchs Number
+    // NaN matches Number
+    // 'yeah' matchs String
+    // false matchs Boolean
+    // function f(){} matchs Function
+    // new Date matchs Date
+    // [1,2,4] matchs Array
+    // /foo/ matchs RegExp
+    // new Set matchs Set
+    // new Map matchs Map
+    // new WeakMap matchs WeakMap
+    // new WeakSet matchs WeakSet
+    // Symbol.iterator matchs Symbol
+    // arguments matches Arguments
+    // new Error matches Error
+    // {a:1 , b:2 } matchs object, matchs {a: 1}, matches {a: Number}
+    const type = getTag(thisValue);
+    switch (type) {
+        case 'Number':
+            value === Number && (matchFound = true);
+            break;
+        case 'String':
+            value === String && (matchFound = true);
+            break;
+        case 'Boolean':
+            value === Boolean && (matchFound = true);
+            break;
+        case 'Function':
+            value === Function && (matchFound = true);
+            break;
+        case 'Date':
+            matchFound = (value === Date) || (getTag(value) === 'Date' && thisValue.valueOf() === value.valueOf());
+            break;
+        case 'Array':
+            value === Array && (matchFound = true);
+            break;
+        case 'RegExp':
+            value === RegExp && (matchFound = true);
+            break;
+        case 'Map':
+            value === Map && (matchFound = true);
+            break;
+        case 'WeakMap':
+            value === WeakMap && (matchFound = true);
+            break;
+        case 'Set':
+            value === Set && (matchFound = true);
+            break;
+        case 'WeakSet':
+            value === WeakSet && (matchFound = true);
+            break;
+        case 'Symbol':
+            value === Symbol && (matchFound = true);
+            break;
+        case 'Arguments':
+            value === exports.Arguments && (matchFound = true);
+            break;
+        case 'Error':
+            value === Error && (matchFound = true);
+            break;
+        case 'Object':
+            // class A {}
+            // new A match A
+            // new B match A if B extends A
+            switch (getTag(value)) {
+                case 'Function':
+                    thisValue instanceof value && (matchFound = true);
+                    break;
+                case 'Object':
+                    matchFound = matchObject(thisValue, value, deep);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+    if (matchFound)
+        return true;
+    return false;
+}
+function isEqual(thisValue, value, deep) {
+    // recursive
+    if ((value instanceof some && thisValue instanceof some)
+        || (value instanceof ok && thisValue instanceof ok)) {
+        return isEqual(thisValue.unwrap(), value.unwrap(), deep);
+    }
+    if (value instanceof err && thisValue instanceof err) {
+        return isEqual(thisValue.unwrapErr(), value.unwrapErr(), deep);
+    }
+    // check
+    return normalEqual(thisValue, value, deep);
+}
 class some {
     constructor(value) {
         this.value = value;
@@ -64,19 +189,14 @@ class some {
             return Ok(Some(this.value.unwrap()));
         }
         else if (this.value instanceof err) {
-            return Err(this.value.unwrap());
+            return Err(this.value.unwrapErr());
         }
         else {
             throw new Error('value is not Result!');
         }
     }
     equal(optb, deep = false) {
-        if (deep) {
-            return optb.isSome() && lodash_isequal_1.default(this.value, optb.unwrap());
-        }
-        else {
-            return optb.isSome() && this.value === optb.unwrap();
-        }
+        return optb.isSome() && isEqual(this.value, optb.unwrap(), deep);
     }
 }
 class none {
@@ -216,13 +336,8 @@ class ok {
             throw new Error('value is not Option!');
         }
     }
-    equal(resb, deep) {
-        if (deep) {
-            return resb.isOk() && lodash_isequal_1.default(this.value, resb.unwrap());
-        }
-        else {
-            return resb.isOk() && this.value === resb.unwrap();
-        }
+    equal(resb, deep = false) {
+        return resb.isOk() && isEqual(this.value, resb.unwrap(), deep);
     }
 }
 class err {
@@ -288,9 +403,8 @@ class err {
     transpose() {
         return Some(Err(this.error));
     }
-    // @ts-ignore: noUnusedParameters
-    equal(resb, deep) {
-        return resb.isErr();
+    equal(resb, deep = false) {
+        return resb.isErr() && isEqual(this.error, resb.unwrapErr(), deep);
     }
 }
 function Ok(value) {
@@ -310,7 +424,7 @@ function makeMatch(branches, deep = false) {
                 return branch(x);
             }
             else {
-                if (x.equal(branch[0], deep)) {
+                if (isMatch(x, branch[0], deep)) {
                     return branch[1]();
                 }
             }
