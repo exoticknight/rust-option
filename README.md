@@ -86,7 +86,7 @@ more matches
 :-----:|:-----:
 1|1, Number
 NaN|NaN, Number
-'yeah'|'yeah', String
+'yeah'|'yeah', 'ea', String
 false|false, Boolean
 function f(){}|Function
 new Date('2000-01-01')|new Date('2000-01-01'), Date
