@@ -183,6 +183,16 @@ class some<T> implements Option<T> {
     return fn(this.value)
   }
 
+  // @ts-ignore: noUnusedParameters
+  okOr<E>(err:E):Result<T, E> {
+    return Ok(this.value)
+  }
+
+  // @ts-ignore: noUnusedParameters
+  okOrElse<E>(err:()=>E):Result<T, E> {
+    return Ok(this.value)
+  }
+
   and<U>(optb:Option<U>):Option<U> {
     return optb
   }
@@ -263,6 +273,14 @@ class none<T> implements Option<T> {
   // @ts-ignore: noUnusedParameters
   mapOrElse<U>(placeholderFn:()=>U, fn:(value:T)=>U):U {
     return placeholderFn()
+  }
+
+  okOr<E>(err:E):Result<T, E> {
+    return Err(err)
+  }
+
+  okOrElse<E>(err:()=>E):Result<T, E> {
+    return Err(err())
   }
 
   // @ts-ignore: noUnusedParameters
