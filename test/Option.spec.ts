@@ -73,6 +73,20 @@ test('map / mapOr / mapOrElse', t => {
   t.end()
 })
 
+test('okOr / okOrElse', t => {
+  let x = Some('foo')
+  t.true(x.okOr(0).equal(Ok('foo')))
+  x = None
+  t.true(x.okOr(0).equal(Err(0)))
+
+  let y = Some('foo')
+  t.true(y.okOrElse(() => 0).equal(Ok('foo')))
+  y = None
+  t.true(y.okOrElse(() => 0).equal(Err(0)))
+
+  t.end()
+})
+
 test('and / andThen', t => {
   let x = Some(2)
   let y = None
