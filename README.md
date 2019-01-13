@@ -21,11 +21,16 @@ Nearly all methods are similar to the [Rust Documentation][option]
 import {
   Some,
   None,
+  Ok,
+  Err,
+
   match,
 } from 'rust-option'
 
 let x = Some(2)
 let y = None
+let z = Ok(1)
+let w = Err('error')
 
 // Note: matchs are exhaustive
 match(x, [
@@ -53,13 +58,16 @@ npm test
 import {
   Some,
   None,
-  match,
   Ok,
   Err,
+
+  match,
 } from 'rust-option'
 
 let x = Some(2)
 let y = None
+let z = Ok(1)
+let w = Err('error')
 ```
 
 equal(===) considered to be match
@@ -177,6 +185,8 @@ TODO
 - [x] map
 - [x] mapOr
 - [x] mapOrElse
+- [x] okOr
+- [x] okOrElse
 - [x] and
 - [x] andThen
 - [x] filter
@@ -192,8 +202,6 @@ as_ref
 as_mut
 as_pin_ref
 as_pin_mut
-ok_or
-ok_or_else
 iter
 iter_mut
 get_or_insert
