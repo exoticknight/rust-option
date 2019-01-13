@@ -76,6 +76,24 @@ export interface Option<T> {
      */
     mapOrElse<U>(placeholderFn: () => U, fn: (value: T) => U): U;
     /**
+     * Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err).
+     *
+     * @template E
+     * @param {E} err
+     * @returns {Result<T, E>}
+     * @memberof Option
+     */
+    okOr<E>(err: E): Result<T, E>;
+    /**
+     * Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err()).
+     *
+     * @template E
+     * @param {()=>E} err
+     * @returns {Result<T, E>}
+     * @memberof Option
+     */
+    okOrElse<E>(err: () => E): Result<T, E>;
+    /**
      * Returns None if the option is None, otherwise returns optb.
      *
      * @template U

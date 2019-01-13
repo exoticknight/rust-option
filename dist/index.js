@@ -164,6 +164,14 @@ class some {
     mapOrElse(placeholderFn, fn) {
         return fn(this.value);
     }
+    // @ts-ignore: noUnusedParameters
+    okOr(err) {
+        return Ok(this.value);
+    }
+    // @ts-ignore: noUnusedParameters
+    okOrElse(err) {
+        return Ok(this.value);
+    }
     and(optb) {
         return optb;
     }
@@ -229,6 +237,12 @@ class none {
     // @ts-ignore: noUnusedParameters
     mapOrElse(placeholderFn, fn) {
         return placeholderFn();
+    }
+    okOr(err) {
+        return Err(err);
+    }
+    okOrElse(err) {
+        return Err(err());
     }
     // @ts-ignore: noUnusedParameters
     and(optb) {
