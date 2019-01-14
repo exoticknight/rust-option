@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/exoticknight/rust-option/branch/master/graph/badge.svg)](https://codecov.io/gh/exoticknight/rust-option)
 ![license](https://img.shields.io/npm/l/rust-option.svg)
 
-brings Option and Result in Rust to Javascript
+brings Option / Result / match from Rust to Javascript
 
 ## Install
 
@@ -13,9 +13,9 @@ npm i -S rust-option
 
 ## Usage
 
-Nearly all methods are similar to the [Rust Documentation][option]
+Nearly all methods are similar to the [Option][option] and [Result][result]
 
-> this lib will not brings all methods from Rust's Option and Result, see [Note](#Note)
+> this lib will not implement all methods from Rust's Option and Result, see [Note](#Note)
 
 ```javascript
 import {
@@ -32,7 +32,7 @@ let y = None
 let z = Ok(1)
 let w = Err('error')
 
-// Note: matchs are exhaustive
+// Note: matches are exhaustive
 match(x, [
   [Some(2), () => console.log('match')],
   [None, () => console.log('not match None')],
@@ -42,7 +42,12 @@ match(x, [
 // output 'match'
 ```
 
+See more examples in [Test][test] and [Examples][examples].
+
 [option]: https://doc.rust-lang.org/std/option/enum.Option.html
+[result]: https://doc.rust-lang.org/std/result/enum.Result.html
+[test]: https://github.com/exoticknight/rust-option/tree/master/test
+[Examples]: #examples
 
 ## Test
 
@@ -168,6 +173,11 @@ ox.equal(oy, true)  // true
 ```
 
 [lodash.isequal]: https://www.npmjs.com/package/lodash.isequal
+
+<a name="#examples"></a>
+## Examples
+
+TODO
 
 <a name="#Note"></a>
 ## Note
