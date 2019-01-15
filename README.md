@@ -119,13 +119,12 @@ Some(1)|Some(1),Some
 Ok(1)|Ok(1),Ok
 Err(1)|Err(1),Err
 None|None
-Some({a:1, b:2 })|Some({a: 1}),Some
+Some({a:1, b:2 })|Some(object),Some({a: 1}),Some
 
 **given**|**value**|**match**
 :-----:|:-----:|:-----:
 class A {}|new A|A
 class B extends A {}|new B|A,B
-
 
 non-exhaustive match throws Error
 
