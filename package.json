@@ -1,6 +1,6 @@
 {
   "name": "rust-option",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "brings Option in Rust to Javascript",
   "repository": {
     "type": "git",
