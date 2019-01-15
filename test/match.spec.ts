@@ -27,6 +27,11 @@ test('match Option', t => {
     () => t.fail('None not match'),
   ])
 
+  match(Some(2), [
+    [Some, () => t.pass('Some(2) matches Some')],
+    [None, () => t.fail('Some(2) should not match None')]
+  ])
+
   // default match
   match(Some(3), [
     [Some(1), () => t.fail('Some 3 not match 1')],
@@ -70,9 +75,21 @@ test('match Result', t => {
     () => t.fail('Ok not match'),
   ])
 
+  match(Ok(2), [
+    [Err, () => t.fail('Ok not match Err')],
+    [Ok, () => t.pass('Ok match')],
+    () => t.fail('Ok not match'),
+  ])
+
   match(Err('error'), [
     [Ok(1), () => t.fail('Err not match 1')],
     [Err('error'), () => t.pass('Err match')],
+    () => t.fail('Err not match'),
+  ])
+
+  match(Err('error'), [
+    [Ok, () => t.fail('Err not match Ok')],
+    [Err, () => t.pass('Err match')],
     () => t.fail('Err not match'),
   ])
 

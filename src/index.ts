@@ -21,121 +21,6 @@ function normalEqual(left:any, right:any, deep:boolean):boolean {
   }
 }
 
-function matchObject(value:any, matcher:any, deep:boolean):boolean {
-  const mProps = Object.getOwnPropertyNames(matcher)
-  return mProps.every(p => isMatch(value[p], matcher[p], deep))
-}
-
-function isMatch(thisValue:any, value:any, deep:boolean):boolean {
-  // recursive
-  if (value instanceof some) return thisValue instanceof some && isMatch(thisValue.unwrap(), value.unwrap(), deep)
-  if (value instanceof ok) return thisValue instanceof ok && isMatch(thisValue.unwrap(), value.unwrap(), deep)
-  if (value instanceof err) return thisValue instanceof err && isMatch(thisValue.unwrapErr(), value.unwrapErr(), deep)
-  if (value instanceof none) return thisValue instanceof none
-
-  let matchFound = false
-
-  // equal is a kind of perfect match
-  if (normalEqual(thisValue, value, deep)) return true
-
-  // check basic type
-  // 1 matchs Number
-  // NaN matches Number
-  // 'yeah' matchs String
-  // false matchs Boolean
-  // function f(){} matchs Function
-  // new Date matchs Date
-  // [1,2,4] matchs Array
-  // /foo/ matchs RegExp
-  // new Set matchs Set
-  // new Map matchs Map
-  // new WeakMap matchs WeakMap
-  // new WeakSet matchs WeakSet
-  // Symbol.iterator matchs Symbol
-  // arguments matches Arguments
-  // new Error matches Error
-  // {a:1 , b:2 } matchs object, matchs {a: 1}, matches {a: Number}
-  const type = getTag(thisValue)
-  switch (type) {
-    case 'Number':
-      value === Number && (matchFound = true)
-      break
-    case 'String':
-      matchFound = (value === String) || (getTag(value) === 'String' && thisValue.includes(value))
-      break
-    case 'Boolean':
-      value === Boolean && (matchFound = true)
-      break
-    case 'Function':
-      value === Function && (matchFound = true)
-      break
-    case 'Date':
-      matchFound = (value === Date) || (getTag(value) === 'Date' && thisValue.valueOf() === value.valueOf())
-      break
-    case 'Array':
-      value === Array && (matchFound = true)
-      break
-    case 'RegExp':
-      value === RegExp && (matchFound = true)
-      break
-    case 'Map':
-      value === Map && (matchFound = true)
-      break
-    case 'WeakMap':
-      value === WeakMap && (matchFound = true)
-      break
-    case 'Set':
-      value === Set && (matchFound = true)
-      break
-    case 'WeakSet':
-      value === WeakSet && (matchFound = true)
-      break
-    case 'Symbol':
-      value === Symbol && (matchFound = true)
-      break
-    case 'Arguments':
-      value === Arguments && (matchFound = true)
-      break
-    case 'Error':
-      value === Error && (matchFound = true)
-      break
-    case 'Object':
-      // class A {}
-      // new A match A
-      // new B match A if B extends A
-      switch (getTag(value)) {
-        case 'Function':
-          thisValue instanceof value && (matchFound = true)
-          break
-        case 'Object':
-          matchFound = matchObject(thisValue, value, deep)
-          break
-        default:
-          break;
-      }
-      break
-    default:
-      break
-  }
-  if (matchFound) return true
-
-  return false
-}
-
-function isEqual(thisValue:any, value:any, deep:boolean):boolean {
-  // recursive
-  if ((value instanceof some && thisValue instanceof some)
-    || (value instanceof ok && thisValue instanceof ok)) {
-    return isEqual(thisValue.unwrap(), value.unwrap(), deep)
-  }
-  if (value instanceof err && thisValue instanceof err) {
-    return isEqual(thisValue.unwrapErr(), value.unwrapErr(), deep)
-  }
-
-  // check
-  return normalEqual(thisValue, value, deep)
-}
-
 class some<T> implements Option<T> {
   private value:T
 
@@ -517,6 +402,124 @@ export function Ok<T>(value:T):Result<T, any> {
 
 export function Err<E>(error:E):Result<any, E> {
   return new err(error)
+}
+
+function matchObject(value:any, matcher:any, deep:boolean):boolean {
+  const mProps = Object.getOwnPropertyNames(matcher)
+  return mProps.every(p => isMatch(value[p], matcher[p], deep))
+}
+
+function isMatch(thisValue:any, value:any, deep:boolean):boolean {
+  // recursive and
+  // Some(1) matches Some
+  // Ok(1) matches Ok
+  // Err(1) matches Err
+  if (thisValue instanceof some) return value === Some || (value instanceof some && isMatch(thisValue.unwrap(), value.unwrap(), deep))
+  if (thisValue instanceof ok) return value === Ok || (value instanceof ok && isMatch(thisValue.unwrap(), value.unwrap(), deep))
+  if (thisValue instanceof err) return value === Err || (value instanceof err && isMatch(thisValue.unwrapErr(), value.unwrapErr(), deep))
+  if (thisValue === None) return value === None
+
+  let matchFound = false
+
+  // equal is a kind of perfect match
+  if (normalEqual(thisValue, value, deep)) return true
+
+  // check basic type
+  // 1 matchs Number
+  // NaN matches Number
+  // 'yeah' matchs String
+  // false matchs Boolean
+  // function f(){} matchs Function
+  // new Date matchs Date
+  // [1,2,4] matchs Array
+  // /foo/ matchs RegExp
+  // new Set matchs Set
+  // new Map matchs Map
+  // new WeakMap matchs WeakMap
+  // new WeakSet matchs WeakSet
+  // Symbol.iterator matchs Symbol
+  // arguments matches Arguments
+  // new Error matches Error
+  // {a:1 , b:2 } matchs object, matchs {a: 1}, matches {a: Number}
+  const type = getTag(thisValue)
+  switch (type) {
+    case 'Number':
+      value === Number && (matchFound = true)
+      break
+    case 'String':
+      matchFound = (value === String) || (getTag(value) === 'String' && thisValue.includes(value))
+      break
+    case 'Boolean':
+      value === Boolean && (matchFound = true)
+      break
+    case 'Function':
+      value === Function && (matchFound = true)
+      break
+    case 'Date':
+      matchFound = (value === Date) || (getTag(value) === 'Date' && thisValue.valueOf() === value.valueOf())
+      break
+    case 'Array':
+      value === Array && (matchFound = true)
+      break
+    case 'RegExp':
+      value === RegExp && (matchFound = true)
+      break
+    case 'Map':
+      value === Map && (matchFound = true)
+      break
+    case 'WeakMap':
+      value === WeakMap && (matchFound = true)
+      break
+    case 'Set':
+      value === Set && (matchFound = true)
+      break
+    case 'WeakSet':
+      value === WeakSet && (matchFound = true)
+      break
+    case 'Symbol':
+      value === Symbol && (matchFound = true)
+      break
+    case 'Arguments':
+      value === Arguments && (matchFound = true)
+      break
+    case 'Error':
+      value === Error && (matchFound = true)
+      break
+    case 'Object':
+      // class A {}
+      // new A match A
+      // new B match A if B extends A
+      switch (getTag(value)) {
+        case 'Function':
+          thisValue instanceof value && (matchFound = true)
+          break
+        case 'Object':
+          matchFound = matchObject(thisValue, value, deep)
+          break
+        default:
+          break;
+      }
+      break
+    default:
+      break
+  }
+  if (matchFound) return true
+
+  return false
+}
+
+function isEqual(thisValue:any, value:any, deep:boolean):boolean {
+  // recursive
+  if ((thisValue instanceof some && value instanceof some)
+    || (thisValue instanceof ok && value instanceof ok)) {
+    return isEqual(thisValue.unwrap(), value.unwrap(), deep)
+  }
+  if (thisValue instanceof err && value instanceof err) {
+    return isEqual(thisValue.unwrapErr(), value.unwrapErr(), deep)
+  }
+
+  // check
+  return normalEqual(thisValue, value, deep)
 }
 
 // helper functions
