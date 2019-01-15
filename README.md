@@ -33,13 +33,15 @@ let z = Ok(1)
 let w = Err('error')
 
 // Note: matches are exhaustive
-match(x, [
-  [Some(2), () => console.log('match')],
-  [None, () => console.log('not match None')],
+let ret = match(x, [
+  [Some(2), () => 'match'],
+  [None, () => 'should not match None'],
+  [Ok, () => 'should not match Ok'],
+  [Err('error'), () => 'should not match Err(\'error\')'],
   // the 'default' match
-  () => console.log('not match default'),
+  (arg) => 'should not match default',
 ])
-// output 'match'
+// ret is 'match'
 ```
 
 See more examples in [Test][test] and [Examples][examples].
@@ -79,7 +81,7 @@ equal(===) considered to be match
 
 ```javascript
 match(1, [
-  [1, () => conso.log('match')],
+  [1, () => console.log('match')],
   () => console.log('not match ')
 ])
 ```
@@ -88,7 +90,7 @@ handle type match
 
 ```javascript
 match(1, [
-  [Number, (x) => conso.log(x)],
+  [Number, (x) => console.log(x)],
   () => console.log('not match ')
 ])
 ```
@@ -113,17 +115,17 @@ Symbol.iterator|Symbol
 arguments|Arguments
 new Error|Error
 {a:1, b:2 }|object, {a: 1}, {a: Number}
+Some(1)|Some(1),Some
+Ok(1)|Ok(1),Ok
+Err(1)|Err(1),Err
+None|None
+Some({a:1, b:2 })|Some({a: 1}),Some
 
-normal match
+**given**|**value**|**match**
+:-----:|:-----:|:-----:
+class A {}|new A|A
+class B extends A {}|new B|A,B
 
-```javascript
-match(x, [
-  [Some(2), () => console.log('match')],
-  [None, () => console.log('not match None')],
-  // the 'default' match
-  () => console.log('not match default'),
-])
-```
 
 non-exhaustive match throws Error
 
@@ -177,7 +179,7 @@ ox.equal(oy, true)  // true
 <a name="#examples"></a>
 ## Examples
 
-TODO
+an [examples](https://stackblitz.com/edit/react-ts-6xdhsg?file=index.tsx) using Some and None with match in React on StackBlitz.
 
 <a name="#Note"></a>
 ## Note
