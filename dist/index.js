@@ -440,10 +440,13 @@ function makeMatch(branches, deep = false) {
             if (typeof branch === 'function') { // default
                 return branch(x);
             }
-            else {
+            else if (Array.isArray(branch)) {
                 if (isMatch(x, branch[0], deep)) {
-                    return branch[1]();
+                    return typeof branch[1] === 'function' ? branch[1](x) : branch[1];
                 }
+            }
+            else {
+                throw new Error('branch must be function or array');
             }
         }
         // no match, not allow

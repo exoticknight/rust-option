@@ -9,5 +9,5 @@ export declare function Some<T>(value: T): Option<T>;
 export declare const None: Option<any>;
 export declare function Ok<T>(value: T): Result<T, any>;
 export declare function Err<E>(error: E): Result<any, E>;
-export declare function makeMatch(branches: (((x: any) => any) | [any, (x?: any) => any])[], deep?: boolean): (opt: any) => any;
-export declare function match(opt: any, branches: (((x: any) => any) | [any, (x?: any) => any])[], deep?: boolean): any;
+export declare function makeMatch(branches: (((x: any) => any) | [any, any | ((x?: any) => any)])[], deep?: boolean): (opt: any) => any;
+export declare function match(opt: any, branches: (((x: any) => any) | [any, any | ((x?: any) => any)])[], deep?: boolean): any;
