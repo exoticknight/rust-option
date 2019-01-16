@@ -85,7 +85,7 @@ more matches
 
 
 **value**|**match**
-:-----:|:-----:
+-----|-----
 1|1, Number
 NaN|NaN, Number
 'yeah'|'yeah', 'ea', String
@@ -111,7 +111,7 @@ Some({a:1, b:2 })|Some(object),Some({a: 1}),Some
 <br>
 
 **given**|**value**|**match**
-:-----:|:-----:|:-----:
+-----|-----|-----
 class A {}|new A|A
 class B extends A {}|new B|A,B
 
