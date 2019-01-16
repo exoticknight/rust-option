@@ -34,11 +34,13 @@ let w = Err('error')
 
 // Note: matches are exhaustive
 let ret = match(x, [
-  [Some(2), () => 'match'],
+  [Some(2), theX => 'match and get the Some(2)'],
   [None, () => 'should not match None'],
   [Ok, () => 'should not match Ok'],
   [Err('error'), () => 'should not match Err(\'error\')'],
-  // the 'default' match
+  // function is not a must
+  [Some(2), 'something'],
+  // the 'default' match must be function
   (arg) => 'should not match default',
 ])
 // ret is 'match'
@@ -61,22 +63,6 @@ npm test
 
 `match` function provides match syntax similar to Rust, but in JavaScript way.
 
-```javascript
-import {
-  Some,
-  None,
-  Ok,
-  Err,
-
-  match,
-} from 'rust-option'
-
-let x = Some(2)
-let y = None
-let z = Ok(1)
-let w = Err('error')
-```
-
 equal(===) considered to be match
 
 ```javascript
@@ -96,6 +82,7 @@ match(1, [
 ```
 
 more matches
+
 
 **value**|**match**
 :-----:|:-----:
@@ -121,10 +108,13 @@ Err(1)|Err(1),Err
 None|None
 Some({a:1, b:2 })|Some(object),Some({a: 1}),Some
 
+
+
 **given**|**value**|**match**
 :-----:|:-----:|:-----:
 class A {}|new A|A
 class B extends A {}|new B|A,B
+
 
 non-exhaustive match throws Error
 
