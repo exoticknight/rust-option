@@ -28,7 +28,7 @@ test('match Option', t => {
   ])
 
   match(Some(2), [
-    [Some, () => t.pass('Some(2) matches Some')],
+    [Some, (x:any) => t.true(x.equal(Some(2)), 'Some(2) matches Some and get 2')],
     [None, () => t.fail('Some(2) should not match None')]
   ])
 
@@ -38,6 +38,20 @@ test('match Option', t => {
     [Some(2), () => t.fail('Some 3 not match 2')],
     x => t.true(x.equal(Some(3))),
   ])
+
+  // no function
+  let ret = match({a: 1, b: 2}, [
+    [{a: 1}, 'match'],
+    () => 'not match'
+  ])
+  t.equal(ret, 'match')
+
+  // other branch will throw error
+  try {
+    match(1, [1 as any])
+  } catch (error) {
+    t.pass('should throw error')
+  }
 
   // no match
   try {

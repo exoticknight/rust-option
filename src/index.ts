@@ -523,16 +523,18 @@ function isEqual(thisValue:any, value:any, deep:boolean):boolean {
 }
 
 // helper functions
-export function makeMatch(branches:(((x:any)=>any) | [any, (x?:any)=>any])[], deep:boolean=false):(opt:any)=>any {
+export function makeMatch(branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)])[], deep:boolean=false):(opt:any)=>any {
   return (x:any) => {
     for(let i=0,len=branches.length; i<len; i++) {
       const branch = branches[i]
       if (typeof branch === 'function') {  // default
         return branch(x)
-      } else {
+      } else if (Array.isArray(branch)) {
         if (isMatch(x, branch[0], deep)) {
-          return branch[1]()
+          return typeof branch[1] === 'function' ? branch[1](x) :branch[1]
         }
+      } else {
+        throw new Error('branch must be function or array')
       }
     }
 
@@ -541,6 +543,6 @@ export function makeMatch(branches:(((x:any)=>any) | [any, (x?:any)=>any])[], de
   }
 }
 
-export function match(opt:any, branches:(((x:any)=>any) | [any, (x?:any)=>any])[], deep:boolean=false):any {
+export function match(opt:any, branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)])[], deep:boolean=false):any {
   return makeMatch(branches, deep)(opt)
 }
