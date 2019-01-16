@@ -43,7 +43,7 @@ let ret = match(x, [
   // the 'default' match must be function
   (arg) => 'should not match default',
 ])
-// ret is 'match'
+// ret is 'match and get the Some(2)'
 ```
 
 See more examples in [Test][test] and [Examples][examples].
@@ -108,13 +108,14 @@ Err(1)|Err(1),Err
 None|None
 Some({a:1, b:2 })|Some(object),Some({a: 1}),Some
 
-
+<br>
 
 **given**|**value**|**match**
 :-----:|:-----:|:-----:
 class A {}|new A|A
 class B extends A {}|new B|A,B
 
+<br>
 
 non-exhaustive match throws Error
 
