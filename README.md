@@ -83,7 +83,6 @@ match(1, [
 
 more matches
 
-
 **value**|**match**
 -----|-----
 1|1, Number
@@ -147,6 +146,12 @@ match(z, [
 ])
 ```
 
+## more helper functions
+
+```typescript
+makeMatch(branches: (((x: any) => any) | [any, any | ((x?: any) => any)])[], deep?: boolean): (opt: any) => any;
+```
+
 ## deepEqual
 
 deepEqual in Javascript is not a piece of cake.
@@ -169,12 +174,12 @@ ox.equal(oy, true)  // true
 <a name="#examples"></a>
 ## Examples
 
-an [examples](https://stackblitz.com/edit/react-ts-6xdhsg?file=index.tsx) using Some and None with match in React on StackBlitz.
+an [examples](https://stackblitz.com/edit/react-ts-6xdhsg?file=index.tsx) with React on StackBlitz.
 
 <a name="#Note"></a>
 ## Note
 
-TODO
+Unlike Rust, JavaScript doesn't the 'Ownership' feature , so some API like 'as_ref ' is not necessary.
 
 ## implement for Option
 
