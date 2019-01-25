@@ -148,8 +148,38 @@ match(z, [
 
 ## more helper functions
 
+### makeMatch
+
 ```typescript
 makeMatch(branches: (((x: any) => any) | [any, any | ((x?: any) => any)])[], deep?: boolean): (opt: any) => any;
+```
+
+actually,
+
+```javascript
+match(x, [
+  () => 'x'
+])
+```
+
+is
+
+```javascript
+makeMatch([
+  () => 'x'
+])(x)
+```
+
+### equal
+
+so you can not just use `===` or `==` to compare Option and Result, but the Option and Result itself provides an API call 'equal' for that.
+
+```javascript
+// equal
+Some(1).equal(Some(1))
+
+// deepEqual
+Ok({a: 1}).equal(Ok({a: 1}), true)
 ```
 
 ## deepEqual
