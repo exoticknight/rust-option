@@ -546,3 +546,43 @@ export function makeMatch(branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)
 export function match(opt:any, branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)])[], deep:boolean=false):any {
   return makeMatch(branches, deep)(opt)
 }
+
+export function resultify<T, E>(func:(x?:any)=>T):()=>Result<T, E> {
+  return (...args:any):Result<T, E> => {
+    try {
+      return Ok(func(...args))
+    } catch (error) {
+      return Err(error)
+    }
+  }
+}
+
+export function resultifySync<T, E>(func:(x?:any)=>T):()=>Promise<Result<T, E>> {
+  return async (...args:any):Promise<Result<T, E>> => {
+    try {
+      return Ok(await func(...args))
+    } catch (error) {
+      return Err(error)
+    }
+  }
+}
+
+export function optionify<T>(func:(x?:any)=>T):()=>Option<T> {
+  return (...args:any):Option<T> => {
+    try {
+      return Some(func(...args))
+    } catch (error) {
+      return None
+    }
+  }
+}
+
+export function optionifySync<T>(func:(x?:any)=>T):()=>Promise<Option<T>> {
+  return async (...args:any):Promise<Option<T>> => {
+    try {
+      return Some(await func(...args))
+    } catch (error) {
+      return None
+    }
+  }
+}

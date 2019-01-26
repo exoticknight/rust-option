@@ -9,6 +9,10 @@ import {
 
   match,
   makeMatch,
+  resultify,
+  resultifySync,
+  optionify,
+  optionifySync,
 
   Arguments,
 } from '../src'
@@ -174,3 +178,86 @@ test('makeMatch', t => {
 
   t.end()
 })
+
+test('resultify / resultifySync', async t => {
+  function returnOne():number {
+    return 1
+  }
+
+  function throwErr():void {
+    throw 'error'
+  }
+
+  function returnPromiseOne() {
+    return Promise.resolve(1)
+  }
+
+  function promiseReject() {
+    return Promise.reject('error')
+  }
+
+  let x = resultify(returnOne)()
+  let y = resultify(throwErr)()
+  let z = await resultifySync(returnPromiseOne)()
+  let w = await resultifySync(promiseReject)()
+  match(x ,[
+    [Ok(1), () => t.pass('match Ok(1)')],
+    () => t.fail('not match Ok(1)')
+  ])
+  match(y ,[
+    [Err, () => t.pass('match error')],
+    () => t.fail('not match error')
+  ])
+  match(z ,[
+    [Ok(1), () => t.pass('match Ok(1)')],
+    () => t.fail('not match Ok(1)')
+  ])
+  match(w ,[
+    [Err, () => t.pass('match error')],
+    () => t.fail('not match error')
+  ])
+
+  t.end()
+})
+
+test('optionify / optionifySync', async t => {
+  function returnOne():number {
+    return 1
+  }
+
+  function throwErr():void {
+    throw 'error'
+  }
+
+  function returnPromiseOne() {
+    return Promise.resolve(1)
+  }
+
+  function promiseReject() {
+    return Promise.reject('error')
+  }
+
+  let x = optionify(returnOne)()
+  let y = optionify(throwErr)()
+  let z = await optionifySync(returnPromiseOne)()
+  let w = await optionifySync(promiseReject)()
+  match(x ,[
+    [Some(1), () => t.pass('match Some(1)')],
+    () => t.fail('not match Some(1)')
+  ])
+  match(y ,[
+    [None, () => t.pass('match None')],
+    () => t.fail('not match None')
+  ])
+  match(z ,[
+    [Some(1), () => t.pass('match Some(1)')],
+    () => t.fail('not match Some(1)')
+  ])
+  match(w ,[
+    [None, () => t.pass('match None')],
+    () => t.fail('not match None')
+  ])
+
+  t.end()
+})
+
