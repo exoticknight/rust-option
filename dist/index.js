@@ -458,4 +458,48 @@ function match(opt, branches, deep = false) {
     return makeMatch(branches, deep)(opt);
 }
 exports.match = match;
+function resultify(func) {
+    return (...args) => {
+        try {
+            return Ok(func(...args));
+        }
+        catch (error) {
+            return Err(error);
+        }
+    };
+}
+exports.resultify = resultify;
+function resultifySync(func) {
+    return async (...args) => {
+        try {
+            return Ok(await func(...args));
+        }
+        catch (error) {
+            return Err(error);
+        }
+    };
+}
+exports.resultifySync = resultifySync;
+function optionify(func) {
+    return (...args) => {
+        try {
+            return Some(func(...args));
+        }
+        catch (error) {
+            return exports.None;
+        }
+    };
+}
+exports.optionify = optionify;
+function optionifySync(func) {
+    return async (...args) => {
+        try {
+            return Some(await func(...args));
+        }
+        catch (error) {
+            return exports.None;
+        }
+    };
+}
+exports.optionifySync = optionifySync;
 //# sourceMappingURL=index.js.map
