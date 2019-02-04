@@ -182,6 +182,32 @@ Some(1).equal(Some(1))
 Ok({a: 1}).equal(Ok({a: 1}), true)
 ```
 
+### optionify / resultify
+
+await a function and make its output or Error to be Option or Result.
+
+```javascript
+const content = await resultify(() => Promise.resolve('content'))()
+
+match(content, [
+  [Ok, c => c.unwrap()],
+  [Err, 'nothing']
+])
+```
+
+### optionifySync / resultifySync
+
+wrap a function and make its output or Error to be Option or Result.
+
+```javascript
+const content = resultifySync(fs.statSync)('./f')
+
+match(content, [
+  [Ok, c => c.unwrap()],
+  [Err, 'nothing']
+])
+```
+
 ## deepEqual
 
 deepEqual in Javascript is not a piece of cake.
