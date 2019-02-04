@@ -196,10 +196,10 @@ test('resultify / resultifySync', async t => {
     return Promise.reject('error')
   }
 
-  let x = resultify(returnOne)()
-  let y = resultify(throwErr)()
-  let z = await resultifySync(returnPromiseOne)()
-  let w = await resultifySync(promiseReject)()
+  let x = resultifySync(returnOne)()
+  let y = resultifySync(throwErr)()
+  let z = await resultify(returnPromiseOne)()
+  let w = await resultify(promiseReject)()
   match(x ,[
     [Ok(1), () => t.pass('match Ok(1)')],
     () => t.fail('not match Ok(1)')
@@ -237,10 +237,10 @@ test('optionify / optionifySync', async t => {
     return Promise.reject('error')
   }
 
-  let x = optionify(returnOne)()
-  let y = optionify(throwErr)()
-  let z = await optionifySync(returnPromiseOne)()
-  let w = await optionifySync(promiseReject)()
+  let x = optionifySync(returnOne)()
+  let y = optionifySync(throwErr)()
+  let z = await optionify(returnPromiseOne)()
+  let w = await optionify(promiseReject)()
   match(x ,[
     [Some(1), () => t.pass('match Some(1)')],
     () => t.fail('not match Some(1)')
