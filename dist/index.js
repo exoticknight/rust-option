@@ -458,7 +458,7 @@ function match(opt, branches, deep = false) {
     return makeMatch(branches, deep)(opt);
 }
 exports.match = match;
-function resultify(func) {
+function resultifySync(func) {
     return (...args) => {
         try {
             return Ok(func(...args));
@@ -468,8 +468,8 @@ function resultify(func) {
         }
     };
 }
-exports.resultify = resultify;
-function resultifySync(func) {
+exports.resultifySync = resultifySync;
+function resultify(func) {
     return async (...args) => {
         try {
             return Ok(await func(...args));
@@ -479,8 +479,8 @@ function resultifySync(func) {
         }
     };
 }
-exports.resultifySync = resultifySync;
-function optionify(func) {
+exports.resultify = resultify;
+function optionifySync(func) {
     return (...args) => {
         try {
             return Some(func(...args));
@@ -490,8 +490,8 @@ function optionify(func) {
         }
     };
 }
-exports.optionify = optionify;
-function optionifySync(func) {
+exports.optionifySync = optionifySync;
+function optionify(func) {
     return async (...args) => {
         try {
             return Some(await func(...args));
@@ -501,5 +501,5 @@ function optionifySync(func) {
         }
     };
 }
-exports.optionifySync = optionifySync;
+exports.optionify = optionify;
 //# sourceMappingURL=index.js.map
