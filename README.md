@@ -235,7 +235,7 @@ an [examples](https://stackblitz.com/edit/react-ts-6xdhsg?file=index.tsx) with R
 <a name="#Note"></a>
 ## Note
 
-Unlike Rust, JavaScript doesn't the 'Ownership' feature , so some API like 'as_ref ' is not necessary.
+Unlike Rust, JavaScript doesn't have the 'Ownership' feature, so some API like 'as_ref ' is not necessary.
 
 ## implement for Option
 
