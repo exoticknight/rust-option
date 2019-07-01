@@ -245,3 +245,14 @@ test('nest', t => {
 
   t.end()
 })
+
+test('.$, similar to ?', t => {
+  t.equal(Ok(1).$, 1)
+  try {
+    Err('error').$
+  } catch (error) {
+    t.equal(error.message, 'error')
+  }
+
+  t.end()
+})

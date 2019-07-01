@@ -1,1 +1,1 @@
-{"version":3,"file":"IOption.js","sourceRoot":"","sources":["../src/IOption.ts"],"names":[],"mappings":""}
+{"version":3,"file":"IOption.js","sourceRoot":"","sources":["../src/IOption.ts"],"names":[],"mappings":";;AAEA,MAAa,SAAU,SAAQ,KAAK;IAClC;QACE,KAAK,EAAE,CAAA;QACP,gCAAgC;QAChC,MAAM,CAAC,cAAc,CAAC,IAAI,EAAE,SAAS,CAAC,SAAS,CAAC,CAAA;IAClD,CAAC;CACF;AAND,8BAMC"}

@@ -1,6 +1,7 @@
 import lodashEqual from 'lodash.isequal'
 import a = require('./IOption')
 export import Option = a.Option
+export import NoneError = a.NoneError
 import b = require('./IResult')
 export import Result = b.Result
 
@@ -26,6 +27,10 @@ class some<T> implements Option<T> {
 
   constructor(value:T) {
     this.value = value
+  }
+
+  get $() {
+    return this.value
   }
 
   isNone() {
@@ -121,6 +126,10 @@ class some<T> implements Option<T> {
 
 class none<T> implements Option<T> {
 
+  get $():never {
+    throw new NoneError()
+  }
+
   isNone() {
     return true
   }
@@ -129,11 +138,11 @@ class none<T> implements Option<T> {
     return false
   }
 
-  expect(msg:string) {
+  expect(msg:string):never {
     throw new Error(msg)
   }
 
-  unwrap() {
+  unwrap():never {
     throw new Error('cannot unwrap None')
   }
 
@@ -217,6 +226,10 @@ class ok<T, E> implements Result<T, E> {
     this.value = value
   }
 
+  get $() {
+    return this.value
+  }
+
   isOk():boolean {
     return true
   }
@@ -284,11 +297,11 @@ class ok<T, E> implements Result<T, E> {
     return this.value
   }
 
-  unwrapErr():E {
+  unwrapErr():never {
     throw new Error(String(this.value))
   }
 
-  expectErr(msg:string):E {
+  expectErr(msg:string):never {
     throw new Error(msg + ': ' + String(this.value))
   }
 
@@ -312,6 +325,10 @@ class err<T, E> implements Result<T, E> {
 
   constructor(error:E) {
     this.error = error
+  }
+
+  get $():never {
+    throw new Error(String(this.error))
   }
 
   isOk():boolean {
@@ -370,11 +387,11 @@ class err<T, E> implements Result<T, E> {
     return op(this.error)
   }
 
-  unwrap():T {
+  unwrap():never {
     throw new Error(String(this.error))
   }
 
-  expect(msg:string):T {
+  expect(msg:string):never {
     throw new Error(msg + ': ' + String(this.error))
   }
 
@@ -547,8 +564,8 @@ export function match(opt:any, branches:(((x:any)=>any) | [any, any | ((x?:any)=
   return makeMatch(branches, deep)(opt)
 }
 
-export function resultifySync<T, E>(func:(x?:any)=>T):(...args:any)=>Result<T, E> {
-  return (...args:any):Result<T, E> => {
+export function resultifySync<T, E>(func:(x?:any)=>T):(...args:any[])=>Result<T, E> {
+  return (...args:any[]):Result<T, E> => {
     try {
       return Ok(func(...args))
     } catch (error) {
@@ -557,8 +574,8 @@ export function resultifySync<T, E>(func:(x?:any)=>T):(...args:any)=>Result<T, E
   }
 }
 
-export function resultify<T, E>(func:(x?:any)=>T):(...args:any)=>Promise<Result<T, E>> {
-  return async (...args:any):Promise<Result<T, E>> => {
+export function resultify<T, E>(func:(x?:any)=>T):(...args:any[])=>Promise<Result<T, E>> {
+  return async (...args:any[]):Promise<Result<T, E>> => {
     try {
       return Ok(await func(...args))
     } catch (error) {
@@ -567,8 +584,8 @@ export function resultify<T, E>(func:(x?:any)=>T):(...args:any)=>Promise<Result<
   }
 }
 
-export function optionifySync<T>(func:(x?:any)=>T):(...args:any)=>Option<T> {
-  return (...args:any):Option<T> => {
+export function optionifySync<T>(func:(x?:any)=>T):(...args:any[])=>Option<T> {
+  return (...args:any[]):Option<T> => {
     try {
       return Some(func(...args))
     } catch (error) {
@@ -577,8 +594,8 @@ export function optionifySync<T>(func:(x?:any)=>T):(...args:any)=>Option<T> {
   }
 }
 
-export function optionify<T>(func:(x?:any)=>T):(...args:any)=>Promise<Option<T>> {
-  return async (...args:any):Promise<Option<T>> => {
+export function optionify<T>(func:(x?:any)=>T):(...args:any[])=>Promise<Option<T>> {
+  return async (...args:any[]):Promise<Option<T>> => {
     try {
       return Some(await func(...args))
     } catch (error) {

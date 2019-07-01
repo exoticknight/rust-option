@@ -3,6 +3,7 @@ import test from 'tape'
 import {
   Some,
   None,
+  NoneError,
 
   Ok,
   Err,
@@ -222,6 +223,17 @@ test('nested', t => {
   t.true(Some(None).equal(Some(None)))
   t.true(Some(Ok(5)).equal(Some(Ok(5))))
   t.true(Some(Err(5)).equal(Some(Err(5))))
+
+  t.end()
+})
+
+test('.$, similar to ?', t => {
+  t.equal(Some(1).$, 1)
+  try {
+    None.$
+  } catch (error) {
+    t.true(error instanceof NoneError)
+  }
 
   t.end()
 })

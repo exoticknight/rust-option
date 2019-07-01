@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
+const a = require("./IOption");
+exports.NoneError = a.NoneError;
 exports.Arguments = Symbol('Arguments');
 function getTag(sth) {
     return Object.prototype.toString.call(sth).slice(8, -1);
@@ -19,6 +21,9 @@ function normalEqual(left, right, deep) {
 class some {
     constructor(value) {
         this.value = value;
+    }
+    get $() {
+        return this.value;
     }
     isNone() {
         return false;
@@ -95,6 +100,9 @@ class some {
     }
 }
 class none {
+    get $() {
+        throw new exports.NoneError();
+    }
     isNone() {
         return true;
     }
@@ -167,6 +175,9 @@ exports.None = new none;
 class ok {
     constructor(value) {
         this.value = value;
+    }
+    get $() {
+        return this.value;
     }
     isOk() {
         return true;
@@ -244,6 +255,9 @@ class ok {
 class err {
     constructor(error) {
         this.error = error;
+    }
+    get $() {
+        throw new Error(String(this.error));
     }
     isOk() {
         return false;

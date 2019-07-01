@@ -134,6 +134,7 @@ match(x, [
 ```
 
 handle nested match
+
 ```javascript
 let z = Ok(x)
 let w = Err('error')
@@ -144,6 +145,28 @@ match(z, [
   // the 'default' match
   () => console.log('not match default'),
 ])
+```
+
+## the ?
+
+use `.$` instead of ?
+
+```javascript
+Ok(1).$ === 1  // similar to Ok(1).unwrap and Ok(1)?
+
+try {
+  Err('I am Err').$
+} catch (err) {
+  err.message === 'I am Err'
+}
+
+Some(1).$ === 1  // similar to Some(1).unwrap() and Some(1)?
+
+try {
+  None.$
+} catch (err) {
+  err instanceof NoneError
+}
 ```
 
 ## more helper functions
@@ -257,6 +280,7 @@ Unlike Rust, JavaScript doesn't have the 'Ownership' feature, so some API like '
 - [x] orElse
 - [x] xor
 - [x] transpose
+- [x] ?
 
 ## not implement for Option
 
@@ -296,6 +320,7 @@ deref
 - [x] unwrapErr
 - [x] expectErr
 - [x] transpose
+- [x] ?
 
 ## not implement for Result
 

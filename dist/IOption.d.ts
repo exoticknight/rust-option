@@ -1,4 +1,7 @@
 import { Result } from './IResult';
+export declare class NoneError extends Error {
+    constructor();
+}
 export interface Option<T> {
     /** rust methods below */
     /**
@@ -19,17 +22,17 @@ export interface Option<T> {
      * throw Error if the value is a None with a custom error message provided by msg.
      *
      * @param {string} msg
-     * @returns {(T | void)}
+     * @returns {(T | never)}
      * @memberof Option
      */
-    expect(msg: string): T | void;
+    expect(msg: string): T | never;
     /**
      * return the value v out of the Option<T> if it is Some(v).
      *
-     * @returns {(T | void)}
+     * @returns {(T | never)}
      * @memberof Option
      */
-    unwrap(): T | void;
+    unwrap(): T | never;
     /**
      * Returns the contained value or a placeholder.
      *
@@ -162,4 +165,11 @@ export interface Option<T> {
      * @memberof Option
      */
     equal(optb: Option<T>, deep?: boolean): boolean;
+    /**
+     * shortcut of unwrap
+     *
+     * @type {T | never}
+     * @memberof Option
+     */
+    $: T | never;
 }

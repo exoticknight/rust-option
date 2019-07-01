@@ -138,10 +138,10 @@ export interface Result<T, E> {
    *
    * Throws Error if the value is an Err, with a error message provided by the Err's value.
    *
-   * @returns {T}
+   * @returns {T | never}
    * @memberof Result
    */
-  unwrap():T
+  unwrap():T | never
 
   /**
    * Unwraps a result, yielding the content of an Ok.
@@ -149,20 +149,20 @@ export interface Result<T, E> {
    * Throws Error if the value is an Err, with a error message including the passed message, and the content of the Err.
    *
    * @param {string} msg
-   * @returns {T}
+   * @returns {T | never}
    * @memberof Result
    */
-  expect(msg:string):T
+  expect(msg:string):T | never
 
   /**
    * Unwraps a result, yielding the content of an Err.
    *
    * Throws Error if the value is an Ok, with a custom error message provided by the Ok's value.
    *
-   * @returns {E}
+   * @returns {E | never}
    * @memberof Result
    */
-  unwrapErr():E
+  unwrapErr():E | never
 
   /**
    * Unwraps a result, yielding the content of an Err.
@@ -170,10 +170,10 @@ export interface Result<T, E> {
    * Throws Error if the value is an Ok, with a error message including the passed message, and the content of the Ok.
    *
    * @param {string} msg
-   * @returns {E}
+   * @returns {E | never}
    * @memberof Result
    */
-  expectErr(msg:string):E
+  expectErr(msg:string):E | never
 
   /**
    * Transposes a Result of an Option into an Option of a Result.
@@ -197,4 +197,13 @@ export interface Result<T, E> {
    * @memberof Result
    */
   equal(resb:Result<T, E>, deep?:boolean):boolean
+
+
+  /**
+   * shortcut of unwrap, throws String(error) if Result is Err
+   *
+   * @type {T | never}
+   * @memberof Result
+   */
+  $:T | never
 }
