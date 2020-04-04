@@ -167,6 +167,14 @@ class none {
         return optb.isNone();
     }
 }
+/**
+ * wrap a value in Some
+ *
+ * @export
+ * @template T
+ * @param {T} value
+ * @returns {Option<T>}
+ */
 function Some(value) {
     return new some(value);
 }
@@ -322,10 +330,26 @@ class err {
         return resb.isErr() && isEqual(this.error, resb.unwrapErr(), deep);
     }
 }
+/**
+ * wrap a value in Ok
+ *
+ * @export
+ * @template T
+ * @param {T} value
+ * @returns {Result<T, any>}
+ */
 function Ok(value) {
     return new ok(value);
 }
 exports.Ok = Ok;
+/**
+ * warp a value in Err
+ *
+ * @export
+ * @template E
+ * @param {E} error
+ * @returns {Result<any, E>}
+ */
 function Err(error) {
     return new err(error);
 }
@@ -455,8 +479,11 @@ function makeMatch(branches, deep = false) {
                 return branch(x);
             }
             else if (Array.isArray(branch)) {
-                if (isMatch(x, branch[0], deep)) {
-                    return typeof branch[1] === 'function' ? branch[1](x) : branch[1];
+                const [b0, b1] = branch;
+                if (isMatch(x, b0, deep)) {
+                    return typeof b1 === 'function'
+                        ? b1((x instanceof ok || x instanceof some) ? x.unwrap() : x instanceof err ? x.unwrapErr() : x)
+                        : b1;
                 }
             }
             else {
@@ -472,6 +499,10 @@ function match(opt, branches, deep = false) {
     return makeMatch(branches, deep)(opt);
 }
 exports.match = match;
+function matches$(opt, pat) {
+    return isMatch(opt, pat, true);
+}
+exports.matches$ = matches$;
 function resultifySync(func) {
     return (...args) => {
         try {
