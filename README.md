@@ -34,7 +34,7 @@ let w = Err('error')
 
 // Note: matches are exhaustive
 let ret = match(x, [
-  [Some(2), theX => 'match and get the Some(2)'],
+  [Some(2), theX => 'match and get the 2'],
   [None, () => 'should not match None'],
   [Ok, () => 'should not match Ok'],
   [Err('error'), () => 'should not match Err(\'error\')'],
@@ -140,7 +140,7 @@ let z = Ok(x)
 let w = Err('error')
 
 match(z, [
-  [Ok(Some(2)), () => console.log('match')],
+  [Ok(Some(2)), () => console.log('match and get Some(2)')],
   [w, () => console.log('not match Err')],
   // the 'default' match
   () => console.log('not match default'),
@@ -152,7 +152,7 @@ match(z, [
 use `.$` instead of ?
 
 ```javascript
-Ok(1).$ === 1  // similar to Ok(1).unwrap and Ok(1)?
+Ok(1).$ === 1  // similar to Ok(1).unwrap() and Ok(1)?
 
 try {
   Err('I am Err').$
@@ -174,7 +174,7 @@ try {
 ### makeMatch
 
 ```typescript
-makeMatch(branches: (((x: any) => any) | [any, any | ((x?: any) => any)])[], deep?: boolean): (opt: any) => any;
+makeMatch<T>(branches:(((x:any)=>T) | [any, T | ((x?:any)=>T)])[], deep:boolean=false):(opt:any)=>T;
 ```
 
 actually,
@@ -213,7 +213,7 @@ await a function and make its output or Error to be Option or Result.
 const content = await resultify(() => Promise.resolve('content'))()
 
 match(content, [
-  [Ok, c => c.unwrap()],
+  [Ok, c => c],
   [Err, 'nothing']
 ])
 ```
@@ -226,7 +226,7 @@ wrap a function and make its output or Error to be Option or Result.
 const content = resultifySync(fs.statSync)('./f')
 
 match(content, [
-  [Ok, c => c.unwrap()],
+  [Ok, c => c],
   [Err, 'nothing']
 ])
 ```

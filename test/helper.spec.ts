@@ -9,6 +9,8 @@ import {
 
   match,
   makeMatch,
+  matches$,
+
   resultify,
   resultifySync,
   optionify,
@@ -32,7 +34,7 @@ test('match Option', t => {
   ])
 
   match(Some(2), [
-    [Some, (x:any) => t.true(x.equal(Some(2)), 'Some(2) matches Some and get 2')],
+    [Some, (x:number) => t.equal(x, 2, 'Some(2) matches Some and get 2')],
     [None, () => t.fail('Some(2) should not match None')]
   ])
 
@@ -82,6 +84,16 @@ test('match Option', t => {
     () => t.fail('deep not match default'),
   ], true)
 
+  match(Some({ code: 1, err: 'http error' }), [
+    [Some({ code: 1 }), () => t.pass('unwrap Some')],
+    () => t.fail('not unwrap Some')
+  ])
+
+  match(None, [
+    [None, () => t.pass('match None')],
+    () => t.fail('not match None')
+  ])
+
   t.end()
 })
 
@@ -124,6 +136,16 @@ test('match Result', t => {
   match(Ok(x), [
     [Ok(1), () => t.fail('not match Some(1)')],
     [Ok(Some(1)), () => t.pass('nest match')]
+  ])
+
+  match(Ok({ code: 1, err: 'http error' }), [
+    [Ok({ code: 1 }), () => t.pass('unwrap Result')],
+    () => t.fail('not unwrap Result')
+  ])
+
+  match(Err({ code: 1, err: 'http error' }), [
+    [Err({ code: 1 }), () => t.pass('unwrap Err')],
+    () => t.fail('not unwrap Err')
   ])
 
   t.end()
@@ -175,6 +197,12 @@ test('match normal', t => {
 
 test('makeMatch', t => {
   makeMatch([[1, () => t.pass('makeMatch 1')], () => t.fail('not match 1')])(1)
+
+  t.end()
+})
+
+test('matches$', t => {
+  t.true(matches$(Ok(1), Ok(Number)))
 
   t.end()
 })
@@ -260,4 +288,3 @@ test('optionify / optionifySync', async t => {
 
   t.end()
 })
-

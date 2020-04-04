@@ -567,15 +567,18 @@ function isEqual(thisValue:any, value:any, deep:boolean):boolean {
 }
 
 // helper functions
-export function makeMatch(branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)])[], deep:boolean=false):(opt:any)=>any {
+export function makeMatch<T>(branches:(((x:any)=>T) | [any, T | ((x?:any)=>T)])[], deep:boolean=false):(opt:any)=>T {
   return (x:any) => {
     for(let i=0,len=branches.length; i<len; i++) {
       const branch = branches[i]
       if (typeof branch === 'function') {  // default
         return branch(x)
       } else if (Array.isArray(branch)) {
-        if (isMatch(x, branch[0], deep)) {
-          return typeof branch[1] === 'function' ? branch[1](x) :branch[1]
+        const [b0, b1] = branch
+        if (isMatch(x, b0, deep)) {
+          return typeof b1 === 'function'
+            ? (b1 as (x?:any) => T)((x instanceof ok || x instanceof some) ? x.unwrap() : x instanceof err ? x.unwrapErr() : x)
+            : b1
         }
       } else {
         throw new Error('branch must be function or array')
@@ -587,8 +590,12 @@ export function makeMatch(branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)
   }
 }
 
-export function match(opt:any, branches:(((x:any)=>any) | [any, any | ((x?:any)=>any)])[], deep:boolean=false):any {
-  return makeMatch(branches, deep)(opt)
+export function match<T>(opt:any, branches:(((x:any)=>T) | [any, T | ((x?:any)=>T)])[], deep:boolean=false):T {
+  return makeMatch<T>(branches, deep)(opt)
+}
+
+export function matches$(opt:any, pat:any):boolean {
+  return isMatch(opt, pat, true)
 }
 
 export function resultifySync<T, E>(func:(x?:any)=>T):(...args:any[])=>Result<T, E> {
