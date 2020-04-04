@@ -213,6 +213,15 @@ class none<T> implements Option<T> {
   }
 }
 
+
+/**
+ * wrap a value in Some
+ *
+ * @export
+ * @template T
+ * @param {T} value
+ * @returns {Option<T>}
+ */
 export function Some<T>(value:T):Option<T> {
   return new some(value)
 }
@@ -413,10 +422,28 @@ class err<T, E> implements Result<T, E> {
   }
 }
 
+
+/**
+ * wrap a value in Ok
+ *
+ * @export
+ * @template T
+ * @param {T} value
+ * @returns {Result<T, any>}
+ */
 export function Ok<T>(value:T):Result<T, any> {
   return new ok(value)
 }
 
+
+/**
+ * warp a value in Err
+ *
+ * @export
+ * @template E
+ * @param {E} error
+ * @returns {Result<any, E>}
+ */
 export function Err<E>(error:E):Result<any, E> {
   return new err(error)
 }
