@@ -1,7 +1,7 @@
 {
   "name": "rust-option",
   "version": "0.11.1",
-  "description": "brings Option in Rust to Javascript",
+  "description": "brings Option / Result / match from Rust to Javascript",
   "repository": {
     "type": "git",
     "url": "https://github.com/exoticknight/rust-option.git"
@@ -48,14 +48,14 @@
   "license": "MIT",
   "devDependencies": {
     "@types/lodash.isequal": "^4.5.5",
-    "@types/node": "^10.14.10",
-    "@types/tape": "^4.2.33",
+    "@types/node": "^10.17.17",
+    "@types/tape": "^4.2.34",
     "codecov": "^3.5.0",
-    "nyc": "^13.3.0",
+    "nyc": "^15.0.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.11.0",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.5.2"
+    "tape": "^4.13.2",
+    "ts-node": "^8.8.1",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "lodash.isequal": "^4.5.0"
